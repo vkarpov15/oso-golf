@@ -98,7 +98,7 @@ app.component('app-component', {
       if (!this.userId || !this.role || !this.resourceType || !this.resourceId) {
         return;
       }
-      await axios.put('/tell', {
+      await axios.put('/.netlify/functions/tell', {
         sessionId,
         userId: this.userId,
         role: this.role,
@@ -117,7 +117,7 @@ app.component('app-component', {
       this.resourceId = null;
     },
     async deleteFact(fact) {
-      await axios.put('/delete', {
+      await axios.put('/.netlify/functions/deleteFact', {
         sessionId,
         userId: fact.userId,
         role: fact.role,
@@ -129,7 +129,7 @@ app.component('app-component', {
     async test() {
       this.state.results = [];
       for (const constraint of this.state.constraints) {
-        const authorized = await axios.get('/authorize', {
+        const authorized = await axios.get('/.netlify/functions/authorize', {
           params: {
             sessionId,
             userId: constraint.userId,
@@ -143,7 +143,7 @@ app.component('app-component', {
     }
   },
   async mounted() {
-    this.state.facts = await axios.get('/facts', {
+    this.state.facts = await axios.get('/.netlify/functions/facts', {
       params: {
         sessionId,
         userId: ['John', 'Jane']

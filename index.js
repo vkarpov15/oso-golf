@@ -1,61 +1,39 @@
 'use strict';
 
-const { Oso } = require('oso-cloud');
-const assert = require('assert');
 const express = require('express');
+const fs = require('fs');
 const path = require('path');
 
-require('./build')(true);
+require('./build')(process.env.WATCH);
 
 const app = express();
 app.use(express.json());
 
-const apiKey = process.env.OSO_CLOUD_API_KEY;
-assert.ok(apiKey, 'Must set OSO_CLOUD_API_KEY environment variable');
-const oso = new Oso('https://cloud.osohq.com', apiKey, { debug: { print: true } });
+const netlifyFunctions = fs.readdirSync('./netlify/functions').reduce((obj, path) => {
+  obj[path.replace(/\.js$/, '')] = require(`./netlify/functions/${path}`);
+  return obj;
+}, {});
 
-app.get('/authorize', async (req, res) => {
-  const authorized = await oso.authorize(
-    { type: 'User', id: `${req.query.sessionId}_${req.query.userId}` },
-    req.query.action,
-    { type: req.query.resourceType, id: req.query.resourceId }
-  );
-  res.json({ authorized });
-});
-
-app.get('/facts', async (req, res) => {
-  const facts = [];
-  for (const userId of req.query.userId) {
-    const factsForUser = await oso.get(
-      'has_role',
-      { type: 'User', id: `${req.query.sessionId}_${userId}` },
-      null,
-      null
-    );
-    facts.push(...factsForUser);
+app.use('/.netlify/functions', express.json(), function netlifyFunctionsMiddleware(req, res) {
+  const actionName = req.path.replace(/^\//, '');
+  if (!netlifyFunctions.hasOwnProperty(actionName)) {
+    throw new Error(`Action ${actionName} not found`);
   }
-  
-  res.json({ facts });
-});
+  const action = netlifyFunctions[actionName];
 
-app.put('/tell', async (req, res) => {
-  await oso.tell(
-    'has_role',
-    { type: 'User', id: `${req.body.sessionId}_${req.body.userId}` },
-    req.body.role,
-    { type: req.body.resourceType, id: req.body.resourceId }
-  );
-  res.json({ ok: true });
-});
-
-app.put('/delete', async (req, res) => {
-  await oso.delete(
-    'has_role',
-    { type: 'User', id: `${req.body.sessionId}_${req.body.userId}` },
-    req.body.role,
-    { type: req.body.resourceType, id: req.body.resourceId }
-  );
-  res.json({ ok: true });
+  const params = {
+    headers: req.headers,
+    body: JSON.stringify(req.body),
+    queryStringParameters: req.query
+  };
+  action.handler(params).
+    then(result => {
+      if (result.statusCode >= 400) {
+        return res.status(400).json({ message: result.body });
+      }
+      res.json(JSON.parse(result.body))
+    }).
+    catch(err => res.status(500).json({ message: err.message, stack: err.stack }));
 });
 
 app.use(express.static('./public'));

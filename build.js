@@ -49,3 +49,7 @@ module.exports = async function build(watch) {
     });
   }
 };
+
+if (require.main === module) {
+  module.exports();
+}
