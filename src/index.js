@@ -36,7 +36,10 @@ app.component('app-component', {
   data: () => ({ userId: null, role: null, resourceType: null, resourceId: null }),
   template: `
   <div>
-    <h1>Add GitHub Permissions for the following constraints</h1>
+    <h1>GitClub Golf</h1>
+    <div>
+      Find the minimum number of Oso facts to satisfy the following constraints as fast as you can!
+    </div>
     <div>
       <div v-for="constraint in state.constraints">
         {{constraint.userId}} {{constraint.shouldFail ? 'cannot' : 'can'}} {{constraint.action}} {{constraint.resourceType}} {{constraint.resourceId}}
