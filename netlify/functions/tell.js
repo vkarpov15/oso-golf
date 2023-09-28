@@ -28,6 +28,7 @@ const TellParams = new Archetype({
 }).compile('TellParams');
 
 module.exports = extrovert.toNetlifyFunction(async params => {
+  params = new TellParams(params);
   await oso.tell(
     'has_role',
     { type: 'User', id: `${params.sessionId}_${params.userId}` },
