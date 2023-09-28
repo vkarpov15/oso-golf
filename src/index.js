@@ -41,6 +41,7 @@ app.component('app-component', {
       Find the minimum number of Oso facts to satisfy the following constraints as fast as you can!
     </div>
     <div>
+      <h2>Constraints</h2>
       <div v-for="constraint in state.constraints">
         {{constraint.userId}} {{constraint.shouldFail ? 'cannot' : 'can'}} {{constraint.action}} {{constraint.resourceType}} {{constraint.resourceId}}
       </div>
