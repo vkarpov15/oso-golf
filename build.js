@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const { copySync } = require('fs-extra');
+const { execSync, exec } = require('child_process');
 const path = require('path');
 const webpack = require('webpack');
 const webpackConfig = require('./webpack.config');
@@ -28,7 +29,20 @@ copySync(
   path.join(__dirname, 'public', 'vendor', 'vue-router')
 );
 
+copySync(
+  path.join(__dirname, 'node_modules', 'prismjs'),
+  path.join(__dirname, 'public', 'vendor', 'prismjs')
+);
+
 module.exports = async function build(watch) {
+  if (watch) {
+    const childProcess = exec('npm run tailwind:watch');
+    childProcess.stdout.on('data', data => console.log('[TAILWIND]', data));
+    childProcess.stderr.on('data', data => console.log('[TAILWIND]', data));
+  } else {
+    execSync('npm run tailwind');
+  }
+
   const compiler = webpack(webpackConfig);
   if (watch) {
     compiler.watch({}, (err, res) => {
