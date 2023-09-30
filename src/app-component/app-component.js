@@ -142,6 +142,23 @@ module.exports = app => app.component('app-component', {
     }
   },
   methods: {
+    startGame() {
+      if (this.state.level !== 0) {
+        return;
+      }
+      this.state.errors = {};
+      if (!this.state.email) {
+        this.state.errors.email = 'Email is required';
+      }
+      if (!this.state.name) {
+        this.state.errors.name = 'Name is required';
+      }
+      if (Object.keys(this.state.errors).length > 0) {
+        return;
+      }
+      this.state.level = 1;
+      this.state.startTime = Date.now();
+    },
     async tell() {
       if (!this.userId || !this.role || !this.resourceType || !this.resourceId) {
         return;

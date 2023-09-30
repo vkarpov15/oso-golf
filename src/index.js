@@ -18,7 +18,12 @@ const app = Vue.createApp({
       ],
       results: [],
       facts: [],
-      sessionId
+      sessionId,
+      level: 0,
+      startTime: null,
+      errors: {},
+      name: '',
+      email: ''
     });
 
     Vue.provide('state', state);
