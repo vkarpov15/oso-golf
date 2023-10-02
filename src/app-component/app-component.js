@@ -148,7 +148,7 @@ module.exports = app => app.component('app-component', {
       const seconds = Math.floor((ms / 1000) % 60);
       const minutes = Math.floor((ms / 1000 / 60) % 60);
 
-      return `${minutes}:${seconds}`;
+      return `${minutes}:${(seconds + '').padStart(2, '0')}`;
     },
     async completeLevel() {
 
@@ -177,6 +177,7 @@ module.exports = app => app.component('app-component', {
       }).then(res => res.data);
 
       this.state.level = 1;
+      this.state.currentTime = new Date();
       this.state.startTime = new Date(player.startTime);
     },
     async tell() {
@@ -247,6 +248,10 @@ module.exports = app => app.component('app-component', {
     }
   },
   async mounted() {
+    setInterval(() => {
+      this.currentTime = new Date();
+    }, 500);
+
     Prism.highlightElement(this.$refs.codeSnippet);
 
     const { player } = await axios.get('/.netlify/functions/resumeGame', {
@@ -269,10 +274,6 @@ module.exports = app => app.component('app-component', {
       resourceType: fact[3].type,
       resourceId: fact[3].id
     })));
-
-    setInterval(() => {
-      this.currentTime = new Date();
-    }, 500);
   },
   async errorCaptured(err) {
     vanillatoasts.create({
