@@ -23,6 +23,7 @@ const app = Vue.createApp({
       par: 0,
       startTime: null,
       errors: {},
+      showNextLevelButton: false,
       name: '',
       email: ''
     });

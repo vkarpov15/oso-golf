@@ -149,6 +149,9 @@ module.exports = app => app.component('app-component', {
       const minutes = Math.floor((ms / 1000 / 60) % 60);
 
       return `${minutes}:${seconds}`;
+    },
+    async completeLevel() {
+
     }
   },
   methods: {
@@ -210,6 +213,7 @@ module.exports = app => app.component('app-component', {
     },
     async test() {
       this.state.results = [];
+      let passed = true;
       for (const constraint of this.state.constraints) {
         const authorized = await axios.get('/.netlify/functions/authorize', {
           params: {
@@ -220,8 +224,26 @@ module.exports = app => app.component('app-component', {
             resourceId: constraint.resourceId
           }
         }).then(res => res.data.authorized);
-        this.state.results.push({ ...constraint, pass: authorized === !constraint.shouldFail });
+        const pass = authorized === !constraint.shouldFail;
+        this.state.results.push({ ...constraint, pass });
+        if (!pass) {
+          passed = false;
+        }
       }
+      if (passed) {
+        this.state.showNextLevelButton = true;
+      }
+    },
+    async verifySolutionForLevel() {
+      const { player } = await axios.post('/.netlify/functions/verifySolutionForLevel', {
+        sessionId: this.state.sessionId,
+        level: this.state.level
+      }).then(res => res.data);
+      this.state.level = player.levelsCompleted + 1;
+    },
+    restart() {
+      window.localStorage.setItem('_gitclubGameSession', '');
+      window.location.reload();
     }
   },
   async mounted() {

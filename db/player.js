@@ -20,8 +20,8 @@ module.exports = mongoose.model('Player', mongoose.Schema({
     required: true,
     default: () => new Date()
   },
-  score: {
-    type: Number
+  par: {
+    type: [Number]
   },
   gameplayTimeMS: {
     type: Number
