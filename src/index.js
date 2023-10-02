@@ -20,6 +20,7 @@ const app = Vue.createApp({
       facts: [],
       sessionId,
       level: 0,
+      par: 0,
       startTime: null,
       errors: {},
       name: '',
@@ -35,5 +36,6 @@ const app = Vue.createApp({
 });
 
 require('./app-component/app-component')(app);
+require('./async-button/async-button')(app);
 
 app.mount('#content');

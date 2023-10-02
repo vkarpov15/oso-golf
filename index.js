@@ -1,8 +1,12 @@
 'use strict';
 
+const assert = require('assert');
 const express = require('express');
 const fs = require('fs');
+const mongoose = require('mongoose');
 const path = require('path');
+
+assert.ok(process.env.MONGODB_CONNECTION_STRING);
 
 require('./build')(process.env.WATCH);
 
@@ -35,6 +39,10 @@ app.use('/.netlify/functions', express.json(), function netlifyFunctionsMiddlewa
     }).
     catch(err => res.status(500).json({ message: err.message, stack: err.stack }));
 });
+
+mongoose.connect(process.env.MONGODB_CONNECTION_STRING);
+
+app.use('/studio', require('@mongoosejs/studio/express')('/studio/api'));
 
 app.use(express.static('./public'));
 app.get('*', (req, res) => {

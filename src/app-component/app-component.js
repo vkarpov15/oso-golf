@@ -113,7 +113,7 @@ has_role(actor: Actor, role: String, repo: Repository) if
 
 module.exports = app => app.component('app-component', {
   inject: ['state'],
-  data: () => ({ userId: null, role: null, resourceType: null, resourceId: null }),
+  data: () => ({ userId: null, role: null, resourceType: null, resourceId: null, currentTime: new Date() }),
   template,
   computed: {
     allUsers() {
@@ -139,10 +139,20 @@ module.exports = app => app.component('app-component', {
     },
     polarCode() {
       return polarCode;
+    },
+    elapsedTime() {
+      if (!this.state.startTime) {
+        return `0:00`;
+      }
+      const ms = this.currentTime.valueOf() - this.state.startTime.valueOf();
+      const seconds = Math.floor((ms / 1000) % 60);
+      const minutes = Math.floor((ms / 1000 / 60) % 60);
+
+      return `${minutes}:${seconds}`;
     }
   },
   methods: {
-    startGame() {
+    async startGame() {
       if (this.state.level !== 0) {
         return;
       }
@@ -156,8 +166,15 @@ module.exports = app => app.component('app-component', {
       if (Object.keys(this.state.errors).length > 0) {
         return;
       }
+
+      const { player } = await axios.post('/.netlify/functions/startGame', {
+        sessionId: this.state.sessionId,
+        name: this.state.name,
+        email: this.state.email
+      }).then(res => res.data);
+
       this.state.level = 1;
-      this.state.startTime = Date.now();
+      this.state.startTime = new Date(player.startTime);
     },
     async tell() {
       if (!this.userId || !this.role || !this.resourceType || !this.resourceId) {
@@ -210,6 +227,17 @@ module.exports = app => app.component('app-component', {
   async mounted() {
     Prism.highlightElement(this.$refs.codeSnippet);
 
+    const { player } = await axios.get('/.netlify/functions/resumeGame', {
+      params: {
+        sessionId: this.state.sessionId
+      }
+    }).then(res => res.data);
+    if (player == null) {
+      return;
+    }
+    this.state.level = player.levelsCompleted + 1;
+    this.state.startTime = new Date(player.startTime);
+
     this.state.facts = await axios.get('/.netlify/functions/facts', {
       params: {
         sessionId: this.state.sessionId,
@@ -221,6 +249,10 @@ module.exports = app => app.component('app-component', {
       resourceType: fact[3].type,
       resourceId: fact[3].id
     })));
+
+    setInterval(() => {
+      this.currentTime = new Date();
+    }, 500);
   },
   async errorCaptured(err) {
     vanillatoasts.create({

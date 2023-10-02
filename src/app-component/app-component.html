@@ -18,51 +18,58 @@
       </div>
       <p class="mt-2 text-sm text-red-600" id="email-error" v-if="state.errors.email">{{state.errors.email}}</p>
     </div>
-    <button
+    <async-button
       class="rounded-md bg-indigo-600 px-3.5 py-2.5 mt-6 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
       @click="startGame()">
       Start Game
-    </button>
+    </async-button>
   </div>
-  <div class="flex gap-10" v-show="state.level > 0">
-    <div class="w-[40%] h-[80vh] overflow-scroll">
-      <pre><code class="language-javascript" v-text="polarCode" ref="codeSnippet"></code></pre>
+  <div v-show="state.level > 0">
+    <div class="flex gap-10 mb-3">
+      <div><b>Levels Completed:</b> {{state.level - 1}}</div>
+      <div><b>Par:</b> +{{state.par}}</div>
+      <div><b>Time Elapsed:</b> {{elapsedTime}}</div>
     </div>
-    <div>
-      <div>
-        <div class="text-2xl font-bold leading-9 tracking-tight mt-1">Constraints</div>
-        <div v-for="constraint in state.constraints">
-          {{constraint.userId}} {{constraint.shouldFail ? 'cannot' : 'can'}} {{constraint.action}} {{constraint.resourceType}} {{constraint.resourceId}}
-        </div>
+    <div class="flex gap-10">
+      <div class="w-[40%] h-[80vh] overflow-scroll">
+        <pre><code class="language-javascript" v-text="polarCode" ref="codeSnippet"></code></pre>
       </div>
       <div>
-        <div class="text-2xl font-bold leading-9 tracking-tight mt-1">Add Fact</div>
-        User <select v-model="userId"><option v-for="user in allUsers" :value="user" v-text="user" /></select>
-        has role <select v-model="role"><option v-for="role in allRoles" :value="role" v-text="role" /></select>
-        on resource <select v-model="resourceType"><option v-for="resource in allResources" :value="resource" v-text="resource" /></select>
-        <select v-model="resourceId"><option v-for="resource in resourceIds" :value="resource" v-text="resource" /></select>
         <div>
-          <button
-            @click="tell"
-            class="rounded bg-indigo-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-          Add Fact
-          </button>
+          <div class="text-2xl font-bold leading-9 tracking-tight mt-1">Constraints</div>
+          <div v-for="constraint in state.constraints">
+            {{constraint.userId}} {{constraint.shouldFail ? 'cannot' : 'can'}} {{constraint.action}} {{constraint.resourceType}} {{constraint.resourceId}}
+          </div>
         </div>
-      </div>
-      <div>
-        <div class="text-2xl font-bold leading-9 tracking-tight mt-1">Existing Facts</div>
-        <div v-for="fact in state.facts">
-          User {{fact.userId}} has role {{fact.role}} on {{fact.resourceType}} {{fact.resourceId}}
-          &nbsp;&nbsp;<button @click="deleteFact(fact)" class="rounded bg-red-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Delete Fact</button>
-        </div>
-      </div>
-      <div>
-        <div class="text-2xl font-bold leading-9 tracking-tight mt-1">Test</div>
         <div>
-          <button @click="test" class="rounded bg-indigo-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Run Tests</button>
+          <div class="text-2xl font-bold leading-9 tracking-tight mt-1">Add Fact</div>
+          User <select v-model="userId"><option v-for="user in allUsers" :value="user" v-text="user" /></select>
+          has role <select v-model="role"><option v-for="role in allRoles" :value="role" v-text="role" /></select>
+          on resource <select v-model="resourceType"><option v-for="resource in allResources" :value="resource" v-text="resource" /></select>
+          <select v-model="resourceId"><option v-for="resource in resourceIds" :value="resource" v-text="resource" /></select>
+          <div>
+            <button
+              @click="tell"
+              class="rounded bg-indigo-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            Add Fact
+            </button>
+          </div>
         </div>
-        <div v-for="result in state.results">
-          [{{result.pass ? 'PASS' : 'FAIL'}}] {{result.userId}} {{result.shouldFail ? 'cannot' : 'can'}} {{result.action}} {{result.resourceType}} {{result.resourceId}}
+        <div>
+          <div class="text-2xl font-bold leading-9 tracking-tight mt-1">Existing Facts</div>
+          <div v-for="fact in state.facts">
+            User {{fact.userId}} has role {{fact.role}} on {{fact.resourceType}} {{fact.resourceId}}
+            &nbsp;&nbsp;<button @click="deleteFact(fact)" class="rounded bg-red-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Delete Fact</button>
+          </div>
+        </div>
+        <div>
+          <div class="text-2xl font-bold leading-9 tracking-tight mt-1">Test</div>
+          <div>
+            <button @click="test" class="rounded bg-indigo-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Run Tests</button>
+          </div>
+          <div v-for="result in state.results">
+            [{{result.pass ? 'PASS' : 'FAIL'}}] {{result.userId}} {{result.shouldFail ? 'cannot' : 'can'}} {{result.action}} {{result.resourceType}} {{result.resourceId}}
+          </div>
         </div>
       </div>
     </div>
