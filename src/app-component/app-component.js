@@ -260,11 +260,9 @@ module.exports = app => app.component('app-component', {
     this.state.level = player.levelsCompleted + 1;
     this.state.startTime = new Date(player.startTime);
 
-    this.state.facts = await axios.get('/.netlify/functions/facts', {
-      params: {
-        sessionId: this.state.sessionId,
-        userId: ['John', 'Jane']
-      }
+    this.state.facts = await axios.put('/.netlify/functions/facts', {
+      sessionId: this.state.sessionId,
+      userId: ['John', 'Jane']
     }).then(res => res.data.facts).then(facts => facts.map(fact => ({
       userId: fact[1].id.replace(this.state.sessionId, '').replace(/^_/, ''),
       role: fact[2],
