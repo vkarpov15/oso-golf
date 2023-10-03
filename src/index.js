@@ -4,6 +4,23 @@ const sessionId = window.localStorage.getItem('_gitclubGameSession') || [...Arra
 console.log(sessionId);
 window.localStorage.setItem('_gitclubGameSession', sessionId);
 
+const level1 = [
+  { userId: 'John', action: 'write', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
+  { userId: 'John', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client', shouldFail: true },
+  { userId: 'John', action: 'write', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true },
+  { userId: 'Jane', action: 'write', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
+  { userId: 'Jane', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client' },
+  { userId: 'Jane', action: 'delete', resourceType: 'Repository', resourceId: 'osohq/configs' }
+];
+
+const level2 = [
+  { userId: 'Bill', action: 'manage_members', resourceType: 'Organization', resourceId: 'osohq' },
+  { userId: 'Bill', action: 'delete', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true },
+  { userId: 'Larry', action: 'read', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
+  { userId: 'Larry', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client' },
+  { userId: 'Larry', action: 'read', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true }
+];
+
 const app = Vue.createApp({
   template: `
   <div>
@@ -16,12 +33,7 @@ const app = Vue.createApp({
     const state = Vue.reactive({
       organizations: ['osohq'],
       repositories: ['osohq/sample-apps', 'osohq/configs'],
-      constraints: [
-        { userId: 'John', action: 'write', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
-        { userId: 'John', action: 'write', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true },
-        { userId: 'Jane', action: 'write', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
-        { userId: 'Jane', action: 'write', resourceType: 'Repository', resourceId: 'osohq/configs' },
-      ],
+      constraints: level1,
       results: [],
       facts: [],
       sessionId,

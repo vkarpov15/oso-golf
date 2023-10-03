@@ -22,9 +22,11 @@ const VerifySolutionForLevelParams = new Archetype({
 const constraintsByLevel = [
   [
     { userId: 'John', action: 'write', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
+    { userId: 'John', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client', shouldFail: true },
     { userId: 'John', action: 'write', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true },
     { userId: 'Jane', action: 'write', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
-    { userId: 'Jane', action: 'write', resourceType: 'Repository', resourceId: 'osohq/configs' },
+    { userId: 'Jane', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client' },
+    { userId: 'Jane', action: 'delete', resourceType: 'Repository', resourceId: 'osohq/configs' }
   ]
 ];
 
