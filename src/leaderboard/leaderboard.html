@@ -1,0 +1,41 @@
+<div class="px-2 py-1">
+  <div class="text-4xl font-bold tracking-tight sm:text-6xl mb-0.5">GitClub Golf Leaderboard</div>
+  <div class="mb-4">
+    <div v-if="status === 'loading'">
+      <img class="w-12" src="/images/loader.gif">
+    </div>
+    <div v-else>
+      <async-button
+        class="rounded-md bg-green-600 px-3.5 py-2.5 mt-6 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
+        @click="$router.push('/')">
+        Back to Game
+      </async-button>
+      <div class="mt-8 flow-root">
+        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+          <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+              <table class="min-w-full divide-y divide-gray-300">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Name</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Levels Completed</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Par</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Time</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-white">
+                  <tr v-for="(player, index) in players">
+                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{player.name}} <img class="inline" v-if="index === 0" src="/images/trophy-gold.svg"><img class="inline" v-if="index === 1" src="/images/trophy-silver.svg"><img class="inline" v-if="index === 2" src="/images/trophy-bronze.svg"></td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{player.levelsCompleted}}</td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{player.par}}</td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{readableMS(player)}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

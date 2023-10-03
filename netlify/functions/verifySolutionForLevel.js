@@ -66,8 +66,9 @@ module.exports = extrovert.toNetlifyFunction(async params => {
   }
 
   player.levelsCompleted = player.levelsCompleted + 1;
-  player.par[level - 1] = facts.length - parByLevel[level - 1];
-  player.gameplayMS = Date.now() - player.startTime.valueOf();
+  player.parPerLevel[level - 1] = facts.length - parByLevel[level - 1];
+  player.par = player.parPerLevel.reduce((sum, v) => sum + v);
+  player.gameplayTimeMS = Date.now() - player.startTime.valueOf();
   await player.save();
   
   return { player };

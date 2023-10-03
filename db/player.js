@@ -20,8 +20,11 @@ module.exports = mongoose.model('Player', mongoose.Schema({
     required: true,
     default: () => new Date()
   },
-  par: {
+  parPerLevel: {
     type: [Number]
+  },
+  par: {
+    type: Number
   },
   gameplayTimeMS: {
     type: Number
