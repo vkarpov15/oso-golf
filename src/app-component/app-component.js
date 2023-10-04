@@ -37,7 +37,7 @@ has_permission(_: Actor, "read", repo: Repository) if
 
 has_permission(actor: Actor, "delete", repo: Repository) if
     has_role(actor, "admin", repo) and
-    is_not_protected(repo, true);
+    is_protected(repo, false);
 `.trim();
 
 module.exports = app => app.component('app-component', {
@@ -66,7 +66,7 @@ module.exports = app => app.component('app-component', {
       return ['Organization', 'Repository'];
     },
     allAttributes() {
-      return ['is_public', 'is_not_protected'];
+      return ['is_public', 'is_protected'];
     },
     resourceIds() {
       if (this.resourceType === 'Organization') {
