@@ -9,34 +9,13 @@ const polarCode = `
 actor User { }
 
 resource Organization { 
-    permissions = [
-        "read",
-        "read_details",
-        "view_members",
-        "manage_members",
-        "set_default_role",
-        "create_repositories",
-        "delete"
-    ];
     roles = ["admin", "member"];
 
-    "read_details" if "member";
-    "view_members" if "member";
-    "create_repositories" if "member";
-
     "member" if "admin";
-    "manage_members" if "admin";
-    "set_default_role" if "admin";
-    "delete" if "admin";
 }
 
 resource Repository { 
-    permissions = [
-        "read", "create", "update", "delete",
-        "invite", "write",
-        "manage_jobs", "manage_issues", "create_issues",
-        "view_members", "manage_members"
-    ];
+    permissions = ["read", "write", "delete"];
     roles = ["reader", "admin", "maintainer", "editor"];
     relations = { organization: Organization };
 
@@ -48,37 +27,17 @@ resource Repository {
 
     # reader permissions
     "read" if "reader";
-    "create_issues" if "reader";
 
     # editor permissions
     "write" if "editor";
-    "manage_jobs" if "editor";
-    "manage_issues" if "editor";
-    "view_members" if "maintainer";
-
-    # admin permissions
-    "manage_members" if "admin";
-    "update" if "admin";
-    "delete" if "admin";
-    "invite" if "admin" ;
 }
 
 has_permission(_: Actor, "read", repo: Repository) if
     is_public(repo, true);
 
-
 has_permission(actor: Actor, "delete", repo: Repository) if
-    has_role(actor, "member", repo) and
-    is_protected(repo, false);
-
-# Misc rules:
-## All organizations are public
-has_permission(_: User, "read", _: Organization);
-has_permission(_: User, "create", "Organization");
-## Users can read all users
-has_permission(_: User, "read", _: User);
-## Users can only read their own profiles
-has_permission(user: User, "read_profile", user: User);
+    has_role(actor, "admin", repo) and
+    is_not_protected(repo, true);
 `.trim();
 
 module.exports = app => app.component('app-component', {
@@ -107,7 +66,7 @@ module.exports = app => app.component('app-component', {
       return ['Organization', 'Repository'];
     },
     allAttributes() {
-      return ['is_public', 'is_protected'];
+      return ['is_public', 'is_not_protected'];
     },
     resourceIds() {
       if (this.resourceType === 'Organization') {
@@ -139,9 +98,9 @@ module.exports = app => app.component('app-component', {
     },
     par() {
       if (this.state.par < 0) {
-        return par;
+        return this.state.par;
       }
-      return `+${par || 0}`;
+      return `+${this.state.par || 0}`;
     }
   },
   methods: {
@@ -211,10 +170,7 @@ module.exports = app => app.component('app-component', {
     async deleteFact(fact) {
       await axios.put('/.netlify/functions/deleteFact', {
         sessionId: this.state.sessionId,
-        userId: fact.userId,
-        role: fact.role,
-        resourceType: fact.resourceType,
-        resourceId: fact.resourceId
+        ...fact
       }).then(res => res.data);
       this.state.facts = this.state.facts.filter(f => fact !== f);
     },
@@ -250,6 +206,7 @@ module.exports = app => app.component('app-component', {
         level: this.state.level
       }).then(res => res.data);
       this.state.level = player.levelsCompleted + 1;
+      await Promise.all(this.state.facts.map(fact => this.deleteFact(fact)));
       if (this.state.level < 3) {
         this.state.constraints = levels[this.state.level - 1].constraints;
         await this.loadFacts();

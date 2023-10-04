@@ -34,11 +34,11 @@
   <div v-show="state.level === 1 || state.level === 2">
     <div class="flex gap-10 mb-3">
       <div><b>Levels Completed:</b> {{state.level - 1}} / 2</div>
-      <div><b>Par:</b> +{{state.par}}</div>
+      <div><b>Par:</b> {{par}}</div>
       <div><b>Time Elapsed:</b> {{elapsedTime}}</div>
     </div>
     <div class="flex gap-10">
-      <div class="w-[40%] h-[80vh] overflow-scroll">
+      <div class="w-[40%] h-[80vh]">
         <pre><code class="language-javascript" v-text="polarCode" ref="codeSnippet"></code></pre>
       </div>
       <div class="w-[60%]">
