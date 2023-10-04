@@ -23,7 +23,7 @@ const level2 = {
     { userId: 'Larry', action: 'read', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true },
     { userId: 'Steve', action: 'read', resourceType: 'Repository', resourceId: 'osohq/sample-apps' }
   ],
-  par: 5
+  par: 4
 };
 
 module.exports = [level1, level2];
