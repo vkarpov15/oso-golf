@@ -14,13 +14,14 @@ const level1 = {
 
 const level2 = {
   constraints: [
-    { userId: 'Bill', action: 'manage_members', resourceType: 'Organization', resourceId: 'osohq' },
+    { userId: 'Bill', action: 'read', resourceType: 'Repository', resourceId: 'osohq/configs' },
+    { userId: 'Bill', action: 'read', resourceType: 'Repository', resourceId: 'osohq/nodejs-client' },
     { userId: 'Bill', action: 'delete', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true },
     { userId: 'Larry', action: 'read', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
     { userId: 'Larry', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client' },
     { userId: 'Larry', action: 'read', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true }
   ],
-  par: 2
+  par: 4
 };
 
 module.exports = [level1, level2];

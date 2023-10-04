@@ -63,35 +63,13 @@ resource Repository {
     "invite" if "admin" ;
 }
 
-resource Issue { 
-    permissions = ["read", "comment", "close"];
-    roles = ["reader", "admin", "creator"];
-    relations = { repository: Repository };
-
-    "reader" if "reader" on "repository";
-    "admin" if "admin" on "repository";
-
-    "read" if "reader";
-    "comment" if "admin";
-    "close" if "creator";
-    "close" if "admin";
-    
-}
-
 has_permission(_: Actor, "read", repo: Repository) if
-    is_public(repo);
+    is_public(repo, true);
 
 
 has_permission(actor: Actor, "delete", repo: Repository) if
     has_role(actor, "member", repo) and
     is_protected(repo, false);
-
-
-# readers can only comment on open issues
-has_permission(actor: Actor, "comment", issue: Issue) if
-    has_permission(actor, "read", issue) and
-    is_closed(issue, false);
-
 
 # Misc rules:
 ## All organizations are public
@@ -101,20 +79,20 @@ has_permission(_: User, "create", "Organization");
 has_permission(_: User, "read", _: User);
 ## Users can only read their own profiles
 has_permission(user: User, "read_profile", user: User);
-
-
-# Complex rules
-
-has_role(actor: Actor, role: String, repo: Repository) if
-    org matches Organization and
-    has_relation(repo, "organization", org) and
-    has_default_role(org, role) and
-    has_role(actor, "member", org);
 `.trim();
 
 module.exports = app => app.component('app-component', {
   inject: ['state'],
-  data: () => ({ userId: null, role: null, resourceType: null, resourceId: null, currentTime: new Date() }),
+  data: () => ({
+    userId: null,
+    role: null,
+    resourceType: null,
+    resourceId: null,
+    attribute: null,
+    attributeValue: null,
+    currentTime: new Date(),
+    factType: 'role'
+  }),
   template,
   computed: {
     allUsers() {
@@ -127,6 +105,9 @@ module.exports = app => app.component('app-component', {
     },
     allResources() {
       return ['Organization', 'Repository'];
+    },
+    allAttributes() {
+      return ['is_public', 'is_protected'];
     },
     resourceIds() {
       if (this.resourceType === 'Organization') {
@@ -155,6 +136,12 @@ module.exports = app => app.component('app-component', {
       }
 
       return `${minutes}:${(seconds + '').padStart(2, '0')}`;
+    },
+    par() {
+      if (this.state.par < 0) {
+        return par;
+      }
+      return `+${par || 0}`;
     }
   },
   methods: {
@@ -184,26 +171,42 @@ module.exports = app => app.component('app-component', {
       this.state.startTime = new Date(player.startTime);
     },
     async tell() {
-      if (!this.userId || !this.role || !this.resourceType || !this.resourceId) {
-        return;
+      if (this.factType === 'role') {
+        if (!this.userId || !this.role || !this.resourceType || !this.resourceId) {
+          return;
+        }
+      } else if (this.factType === 'attribute') {
+        if (!this.resourceType || !this.resourceId || !this.attribute || this.attributeValue == null) {
+          return;
+        }
       }
       await axios.put('/.netlify/functions/tell', {
         sessionId: this.state.sessionId,
+        factType: this.factType,
         userId: this.userId,
         role: this.role,
         resourceType: this.resourceType,
-        resourceId: this.resourceId
+        resourceId: this.resourceId,
+        attribute: this.attribute,
+        attributeValue: this.attributeValue
       }).then(res => res.data);
       this.state.facts.push({
+        factType: this.factType,
         userId: this.userId,
         role: this.role,
         resourceType: this.resourceType,
-        resourceId: this.resourceId
+        resourceId: this.resourceId,
+        attribute: this.attribute,
+        attributeValue: this.attributeValue
       });
       this.userId = null;
       this.role = null;
-      this.resourceType = null;
+      if (this.factType !== 'attribute') {
+        this.resourceType = null;
+      }
       this.resourceId = null;
+      this.attribute = null;
+      this.attributeValue = null;
     },
     async deleteFact(fact) {
       await axios.put('/.netlify/functions/deleteFact', {
@@ -219,13 +222,16 @@ module.exports = app => app.component('app-component', {
       this.state.results = [];
       let passed = true;
       for (const constraint of this.state.constraints) {
+        const resourceId = constraint.resourceType === 'Repository' ?
+          `${this.state.sessionId}_${constraint.resourceId}` :
+          constraint.resourceId;
         const authorized = await axios.get('/.netlify/functions/authorize', {
           params: {
             sessionId: this.state.sessionId,
             userId: constraint.userId,
             action: constraint.action,
             resourceType: constraint.resourceType,
-            resourceId: constraint.resourceId
+            resourceId
           }
         }).then(res => res.data.authorized);
         const pass = authorized === !constraint.shouldFail;
@@ -244,11 +250,39 @@ module.exports = app => app.component('app-component', {
         level: this.state.level
       }).then(res => res.data);
       this.state.level = player.levelsCompleted + 1;
-      this.state.constraints = levels[this.state.level - 1].constraints;
+      if (this.state.level < 3) {
+        this.state.constraints = levels[this.state.level - 1].constraints;
+        await this.loadFacts();
+      }
+      this.state.par = player.par;
+      this.state.results = [];
+      this.state.showNextLevelButton = false;
     },
     restart() {
       window.localStorage.setItem('_gitclubGameSession', '');
       window.location.reload();
+    },
+    async loadFacts() {
+      const facts = await axios.put('/.netlify/functions/facts', {
+        sessionId: this.state.sessionId,
+        userId: [...new Set(this.state.constraints.map(c => c.userId))]
+      }).then(res => res.data.facts);
+      
+      this.state.facts = facts.map(fact => {
+        return fact[0] === 'has_role' ? {
+          factType: 'role',
+          userId: fact[1].id.replace(this.state.sessionId, '').replace(/^_/, ''),
+          role: fact[2],
+          resourceType: fact[3].type,
+          resourceId: fact[3].id.replace(this.state.sessionId, '').replace(/^_/, '')
+        } : {
+          factType: 'attribute',
+          attribute: fact[0],
+          resourceType: fact[1].type,
+          resourceId: fact[1].id.replace(this.state.sessionId, '').replace(/^_/, ''),
+          attributeValue: fact[2].id === 'true'
+        };
+      });
     }
   },
   async mounted() {
@@ -267,18 +301,12 @@ module.exports = app => app.component('app-component', {
       return;
     }
     this.state.level = player.levelsCompleted + 1;
-    this.state.constraints = levels[this.state.level - 1].constraints;
+    if (this.state.level < 3) {
+      this.state.constraints = levels[this.state.level - 1].constraints;
+      await this.loadFacts();
+    }
+    this.state.par = player.par;
     this.state.startTime = new Date(player.startTime);
-
-    this.state.facts = await axios.put('/.netlify/functions/facts', {
-      sessionId: this.state.sessionId,
-      userId: [...new Set(this.state.constraints.map(c => c.userId))]
-    }).then(res => res.data.facts).then(facts => facts.map(fact => ({
-      userId: fact[1].id.replace(this.state.sessionId, '').replace(/^_/, ''),
-      role: fact[2],
-      resourceType: fact[3].type,
-      resourceId: fact[3].id
-    })));
   },
   async errorCaptured(err) {
     vanillatoasts.create({

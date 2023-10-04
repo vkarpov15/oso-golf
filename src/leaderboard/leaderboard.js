@@ -22,6 +22,12 @@ module.exports = app => app.component('leaderboard', {
       }
 
       return `${minutes}:${(seconds + '').padStart(2, '0')}`;
+    },
+    par(player) {
+      if (player.par < 0) {
+        return player.par;
+      }
+      return `+${player.par}`;
     }
   },
   async mounted() {

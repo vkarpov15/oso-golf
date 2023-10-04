@@ -27,6 +27,23 @@ module.exports = extrovert.toNetlifyFunction(async params => {
     );
     facts.push(...factsForUser);
   }
+  for (const repo of ['osohq/sample-apps', 'osohq/nodejs-client', 'osohq/configs']) {
+    let factsForRepo = await oso.get(
+      'is_protected',
+      { type: 'Repository', id: `${params.sessionId}_${repo}` },
+      null,
+      null
+    );
+    facts.push(...factsForRepo);
+
+    factsForRepo = await oso.get(
+      'is_public',
+      { type: 'Repository', id: `${params.sessionId}_${repo}` },
+      null,
+      null
+    );
+    facts.push(...factsForRepo);
+  }
   
   return { facts };
 }, null, 'facts');
