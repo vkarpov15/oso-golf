@@ -19,18 +19,9 @@ const VerifySolutionForLevelParams = new Archetype({
   }
 }).compile('VerifySolutionForLevelParams');
 
-const constraintsByLevel = [
-  [
-    { userId: 'John', action: 'write', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
-    { userId: 'John', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client', shouldFail: true },
-    { userId: 'John', action: 'write', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true },
-    { userId: 'Jane', action: 'write', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
-    { userId: 'Jane', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client' },
-    { userId: 'Jane', action: 'delete', resourceType: 'Repository', resourceId: 'osohq/configs' }
-  ]
-];
+const constraintsByLevel = require('../../levels').map(level => level.constraints);
 
-const parByLevel = [2];
+const parByLevel = require('../../levels').map(level => level.par);
 
 module.exports = extrovert.toNetlifyFunction(async params => {
   const { sessionId, level } = new VerifySolutionForLevelParams(params);

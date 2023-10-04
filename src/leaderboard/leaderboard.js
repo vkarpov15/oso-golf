@@ -14,6 +14,13 @@ module.exports = app => app.component('leaderboard', {
       }
       const seconds = Math.floor((player.gameplayTimeMS / 1000) % 60);
       const minutes = Math.floor((player.gameplayTimeMS / 1000 / 60) % 60);
+
+      const hours = Math.floor(player.gameplayTimeMS / 1000 / 60 / 60);
+
+      if (hours) {
+        return `${hours}:${(minutes + '').padStart(2, '0')}:${(seconds + '').padStart(2, '0')}`;
+      }
+
       return `${minutes}:${(seconds + '').padStart(2, '0')}`;
     }
   },

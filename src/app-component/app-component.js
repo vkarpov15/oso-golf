@@ -1,6 +1,7 @@
 'use strict';
 
 const axios = require('axios');
+const levels = require('../../levels');
 const template = require('./app-component.html')
 const vanillatoasts = require('vanillatoasts');
 
@@ -147,11 +148,13 @@ module.exports = app => app.component('app-component', {
       const ms = this.currentTime.valueOf() - this.state.startTime.valueOf();
       const seconds = Math.floor((ms / 1000) % 60);
       const minutes = Math.floor((ms / 1000 / 60) % 60);
+      const hours = Math.floor(ms / 1000 / 60 / 60);
+
+      if (hours) {
+        return `${hours}:${(minutes + '').padStart(2, '0')}:${(seconds + '').padStart(2, '0')}`;
+      }
 
       return `${minutes}:${(seconds + '').padStart(2, '0')}`;
-    },
-    async completeLevel() {
-
     }
   },
   methods: {
@@ -241,6 +244,7 @@ module.exports = app => app.component('app-component', {
         level: this.state.level
       }).then(res => res.data);
       this.state.level = player.levelsCompleted + 1;
+      this.state.constraints = levels[this.state.level - 1].constraints;
     },
     restart() {
       window.localStorage.setItem('_gitclubGameSession', '');
@@ -263,11 +267,12 @@ module.exports = app => app.component('app-component', {
       return;
     }
     this.state.level = player.levelsCompleted + 1;
+    this.state.constraints = levels[this.state.level - 1].constraints;
     this.state.startTime = new Date(player.startTime);
 
     this.state.facts = await axios.put('/.netlify/functions/facts', {
       sessionId: this.state.sessionId,
-      userId: ['John', 'Jane']
+      userId: [...new Set(this.state.constraints.map(c => c.userId))]
     }).then(res => res.data.facts).then(facts => facts.map(fact => ({
       userId: fact[1].id.replace(this.state.sessionId, '').replace(/^_/, ''),
       role: fact[2],
