@@ -1,0 +1,4 @@
+[[redirects]]
+  from = "/leaderboard"
+  to = "/"
+  status = 200
