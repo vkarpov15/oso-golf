@@ -58,6 +58,12 @@ module.exports = app => app.component('app-component', {
       return [...new Set(this.state.constraints.map(c => c.userId))];
     },
     allRoles() {
+      if (this.resourceType === 'Organization') {
+        return ['admin', 'member'];
+      }
+      if (this.resourceType === 'Repository') {
+        return ["reader", "admin", "maintainer", "editor"];
+      }
       return [
         "reader", "admin", "maintainer", "editor", "member"
       ];
@@ -103,6 +109,13 @@ module.exports = app => app.component('app-component', {
       return `+${this.state.par || 0}`;
     }
   },
+  watch: {
+    resourceType() {
+      if (!this.allRoles.includes(this.role)) {
+        this.role = null;
+      }
+    }
+  },
   methods: {
     async startGame() {
       if (this.state.level !== 0) {
@@ -132,10 +145,22 @@ module.exports = app => app.component('app-component', {
     async tell() {
       if (this.factType === 'role') {
         if (!this.userId || !this.role || !this.resourceType || !this.resourceId) {
+          vanillatoasts.create({
+            title: 'Missing a required field',
+            icon: '/images/failure.jpg',
+            timeout: 5000,
+            positionClass: 'bottomRight'
+          });
           return;
         }
       } else if (this.factType === 'attribute') {
         if (!this.resourceType || !this.resourceId || !this.attribute || this.attributeValue == null) {
+          vanillatoasts.create({
+            title: 'Missing a required field',
+            icon: '/images/failure.jpg',
+            timeout: 5000,
+            positionClass: 'bottomRight'
+          });
           return;
         }
       }
