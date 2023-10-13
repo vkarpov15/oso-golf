@@ -3,11 +3,9 @@
 const axios = require('axios');
 const template = require('./leaderboard.html')
 
-const query = new URLSearchParams(window.location.search);
-
 module.exports = app => app.component('leaderboard', {
   inject: ['state'],
-  data: () => ({ status: 'loading', players: [], admin: query.has('admin') }),
+  data: () => ({ status: 'loading', players: [] }),
   template,
   methods: {
     readableMS(player) {
