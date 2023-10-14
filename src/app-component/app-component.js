@@ -191,6 +191,8 @@ module.exports = app => app.component('app-component', {
       this.resourceId = null;
       this.attribute = null;
       this.attributeValue = null;
+
+      await this.test();
     },
     async deleteFact(fact) {
       await axios.put('/.netlify/functions/deleteFact', {
@@ -198,6 +200,7 @@ module.exports = app => app.component('app-component', {
         ...fact
       }).then(res => res.data);
       this.state.facts = this.state.facts.filter(f => fact !== f);
+      await this.test();
     },
     async test() {
       this.state.results = [];
@@ -225,6 +228,12 @@ module.exports = app => app.component('app-component', {
         this.state.showNextLevelButton = true;
       }
     },
+    displayImageForTestResult(index) {
+      if (!this.state.results[index]) {
+        return '/images/loader.gif';
+      }
+      return this.state.results[index].pass ? '/images/check-green.svg' : '/images/error-red.svg';
+    },
     async verifySolutionForLevel() {
       const { player } = await axios.post('/.netlify/functions/verifySolutionForLevel', {
         sessionId: this.state.sessionId,
@@ -235,6 +244,7 @@ module.exports = app => app.component('app-component', {
       if (this.state.level < 3) {
         this.state.constraints = levels[this.state.level - 1].constraints;
         await this.loadFacts();
+        await this.test();
       }
       this.state.par = player.par;
       this.state.results = [];
@@ -286,6 +296,7 @@ module.exports = app => app.component('app-component', {
     if (this.state.level < 3) {
       this.state.constraints = levels[this.state.level - 1].constraints;
       await this.loadFacts();
+      await this.test();
     }
     this.state.par = player.par;
     this.state.startTime = new Date(player.startTime);
