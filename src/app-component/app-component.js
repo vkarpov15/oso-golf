@@ -163,7 +163,9 @@ module.exports = app => app.component('app-component', {
           return;
         }
       } else if (factType === 'attribute') {
+        this.resourceType = 'Repository';
         if (!this.resourceType || !this.resourceId || !this.attribute || this.attributeValue == null) {
+          console.log(this.resourceType, this.resourceId, this.attribute, this.attributeValue);
           vanillatoasts.create({
             title: 'Missing a required field',
             icon: '/images/failure.jpg',
@@ -194,9 +196,7 @@ module.exports = app => app.component('app-component', {
       });
       this.userId = null;
       this.role = null;
-      if (factType !== 'attribute') {
-        this.resourceType = null;
-      }
+      this.resourceType = null;
       this.resourceId = null;
       this.attribute = null;
       this.attributeValue = null;
