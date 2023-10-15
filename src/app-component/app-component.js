@@ -45,10 +45,16 @@ module.exports = app => app.component('app-component', {
   data: () => ({
     userId: null,
     role: null,
-    resourceType: null,
-    resourceId: null,
-    attribute: null,
-    attributeValue: null,
+    attributeFact: {
+      resourceId: null,
+      attribute: null,
+      attributeValue: null
+    },
+    roleFact: {
+      resourceType: null,
+      resourceId: null,
+      role: null
+    },
     currentTime: new Date()
   }),
   template,
@@ -57,10 +63,10 @@ module.exports = app => app.component('app-component', {
       return [...new Set(this.state.constraints.map(c => c.userId))];
     },
     allRoles() {
-      if (this.resourceType === 'Organization') {
+      if (this.roleFact.resourceType === 'Organization') {
         return ['admin', 'member'];
       }
-      if (this.resourceType === 'Repository') {
+      if (this.roleFact.resourceType === 'Repository') {
         return ["reader", "admin", "maintainer", "editor"];
       }
       return [
@@ -74,10 +80,10 @@ module.exports = app => app.component('app-component', {
       return ['is_public', 'is_protected'];
     },
     resourceIds() {
-      if (this.resourceType === 'Organization') {
+      if (this.roleFact.resourceType === 'Organization') {
         return this.state.organizations;
       }
-      if (this.resourceType === 'Repository') {
+      if (this.roleFact.resourceType === 'Repository') {
         return this.state.repositories;
       }
 
@@ -118,9 +124,9 @@ module.exports = app => app.component('app-component', {
     }
   },
   watch: {
-    resourceType() {
-      if (!this.allRoles.includes(this.role)) {
-        this.role = null;
+    'roleFact.resourceType'() {
+      if (!this.allRoles.includes(this.roleFact.role)) {
+        this.roleFact.role = null;
       }
     }
   },
@@ -151,55 +157,75 @@ module.exports = app => app.component('app-component', {
       this.state.startTime = new Date(player.startTime);
       await this.test();
     },
-    async tell(factType) {
-      if (factType === 'role') {
-        if (!this.userId || !this.role || !this.resourceType || !this.resourceId) {
-          vanillatoasts.create({
-            title: 'Missing a required field',
-            icon: '/images/failure.jpg',
-            timeout: 5000,
-            positionClass: 'bottomRight'
-          });
-          return;
-        }
-      } else if (factType === 'attribute') {
-        this.resourceType = 'Repository';
-        if (!this.resourceType || !this.resourceId || !this.attribute || this.attributeValue == null) {
-          console.log(this.resourceType, this.resourceId, this.attribute, this.attributeValue);
-          vanillatoasts.create({
-            title: 'Missing a required field',
-            icon: '/images/failure.jpg',
-            timeout: 5000,
-            positionClass: 'bottomRight'
-          });
-          return;
-        }
+    async addRoleFact() {
+      const { roleFact } = this;
+      if (!this.userId || !roleFact.role || !roleFact.resourceType || !roleFact.resourceId) {
+        vanillatoasts.create({
+          title: 'Missing a required field',
+          icon: '/images/failure.jpg',
+          timeout: 5000,
+          positionClass: 'bottomRight'
+        });
+        return;
       }
+
+      const factType = 'role';
       await axios.put('/.netlify/functions/tell', {
         sessionId: this.state.sessionId,
         factType,
         userId: this.userId,
-        role: this.role,
-        resourceType: this.resourceType,
-        resourceId: this.resourceId,
-        attribute: this.attribute,
-        attributeValue: this.attributeValue
+        role: this.roleFact.role,
+        resourceType: this.roleFact.resourceType,
+        resourceId: this.roleFact.resourceId
       }).then(res => res.data);
       this.state.facts.push({
         factType,
         userId: this.userId,
-        role: this.role,
-        resourceType: this.resourceType,
-        resourceId: this.resourceId,
-        attribute: this.attribute,
-        attributeValue: this.attributeValue
+        ...this.roleFact
       });
+      this.roleFact = {
+        resourceType: null,
+        resourceId: null,
+        role: null
+      };
       this.userId = null;
-      this.role = null;
-      this.resourceType = null;
-      this.resourceId = null;
-      this.attribute = null;
-      this.attributeValue = null;
+
+      await this.test();
+    },
+    async addAttributeFact() {
+      const { attributeFact } = this;
+      if (!attributeFact.resourceId || !attributeFact.attribute || attributeFact.attributeValue == null) {
+        vanillatoasts.create({
+          title: 'Missing a required field',
+          icon: '/images/failure.jpg',
+          timeout: 5000,
+          positionClass: 'bottomRight'
+        });
+        return;
+      }
+
+      const resourceType = 'Repository';
+      const factType = 'attribute';
+      await axios.put('/.netlify/functions/tell', {
+        sessionId: this.state.sessionId,
+        factType,
+        userId: this.userId,
+        resourceType,
+        ...this.attributeFact
+      }).then(res => res.data);
+      this.state.facts.push({
+        factType,
+        userId: this.userId,
+        resourceType,
+        ...this.attributeFact
+      });
+      this.attributeFact = {
+        resourceId: null,
+        attribute: null,
+        attributeValue: null
+      };
+      
+      this.userId = null;
 
       await this.test();
     },
@@ -213,6 +239,7 @@ module.exports = app => app.component('app-component', {
     },
     async test() {
       this.state.results = [];
+      this.state.showNextLevelButton = null;
       let passed = true;
       for (const constraint of this.state.constraints) {
         const resourceId = constraint.resourceType === 'Repository' ?
@@ -233,9 +260,7 @@ module.exports = app => app.component('app-component', {
           passed = false;
         }
       }
-      if (passed) {
-        this.state.showNextLevelButton = true;
-      }
+      this.state.showNextLevelButton = passed;
     },
     displayImageForTestResult(index) {
       if (!this.state.results[index]) {
