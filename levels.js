@@ -9,7 +9,7 @@ const level1 = {
     { userId: 'Jane', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client' },
     { userId: 'Jane', action: 'delete', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true }
   ],
-  par: 2
+  par: 4
 };
 
 const level2 = {
@@ -23,7 +23,7 @@ const level2 = {
     { userId: 'Larry', action: 'read', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true },
     { userId: 'Steve', action: 'read', resourceType: 'Repository', resourceId: 'osohq/sample-apps' }
   ],
-  par: 4
+  par: 6
 };
 
 module.exports = [level1, level2];

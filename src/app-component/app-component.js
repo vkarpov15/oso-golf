@@ -49,8 +49,7 @@ module.exports = app => app.component('app-component', {
     resourceId: null,
     attribute: null,
     attributeValue: null,
-    currentTime: new Date(),
-    factType: 'role'
+    currentTime: new Date()
   }),
   template,
   computed: {
@@ -107,6 +106,15 @@ module.exports = app => app.component('app-component', {
         return this.state.par;
       }
       return `+${this.state.par || 0}`;
+    },
+    parForLevel() {
+      const parForLevel = levels[this.state.level - 1].par;
+      const par = this.state.facts.length - parForLevel;
+
+      return par < 0 ? par : `+${par}`;
+    },
+    level() {
+      return levels[this.state.level - 1];
     }
   },
   watch: {
@@ -141,9 +149,10 @@ module.exports = app => app.component('app-component', {
       this.state.level = 1;
       this.state.currentTime = new Date();
       this.state.startTime = new Date(player.startTime);
+      await this.test();
     },
-    async tell() {
-      if (this.factType === 'role') {
+    async tell(factType) {
+      if (factType === 'role') {
         if (!this.userId || !this.role || !this.resourceType || !this.resourceId) {
           vanillatoasts.create({
             title: 'Missing a required field',
@@ -153,7 +162,7 @@ module.exports = app => app.component('app-component', {
           });
           return;
         }
-      } else if (this.factType === 'attribute') {
+      } else if (factType === 'attribute') {
         if (!this.resourceType || !this.resourceId || !this.attribute || this.attributeValue == null) {
           vanillatoasts.create({
             title: 'Missing a required field',
@@ -166,7 +175,7 @@ module.exports = app => app.component('app-component', {
       }
       await axios.put('/.netlify/functions/tell', {
         sessionId: this.state.sessionId,
-        factType: this.factType,
+        factType,
         userId: this.userId,
         role: this.role,
         resourceType: this.resourceType,
@@ -175,7 +184,7 @@ module.exports = app => app.component('app-component', {
         attributeValue: this.attributeValue
       }).then(res => res.data);
       this.state.facts.push({
-        factType: this.factType,
+        factType,
         userId: this.userId,
         role: this.role,
         resourceType: this.resourceType,
@@ -185,7 +194,7 @@ module.exports = app => app.component('app-component', {
       });
       this.userId = null;
       this.role = null;
-      if (this.factType !== 'attribute') {
+      if (factType !== 'attribute') {
         this.resourceType = null;
       }
       this.resourceId = null;
