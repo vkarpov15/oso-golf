@@ -5,6 +5,7 @@ console.log(sessionId);
 window.localStorage.setItem('_gitclubGameSession', sessionId);
 
 const levels = require('../levels');
+const vanillatoasts = require('vanillatoasts');
 
 const app = Vue.createApp({
   template: `
@@ -36,6 +37,14 @@ const app = Vue.createApp({
     window.state = state;
 
     return state;
+  },
+  async errorCaptured(err) {
+    vanillatoasts.create({
+      title: err.message,
+      icon: '/images/failure.jpg',
+      timeout: 5000,
+      positionClass: 'bottomRight'
+    });
   }
 });
 

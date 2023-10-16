@@ -55,7 +55,8 @@ module.exports = app => app.component('app-component', {
       resourceId: null,
       role: null
     },
-    currentTime: new Date()
+    currentTime: new Date(),
+    status: 'loading'
   }),
   template,
   computed: {
@@ -121,6 +122,9 @@ module.exports = app => app.component('app-component', {
     },
     level() {
       return levels[this.state.level - 1];
+    },
+    testsInProgress() {
+      return this.state.constraints.length > 0 && this.state.constraints.length !== this.state.results.length;
     }
   },
   watch: {
@@ -274,15 +278,19 @@ module.exports = app => app.component('app-component', {
         level: this.state.level
       }).then(res => res.data);
       this.state.level = player.levelsCompleted + 1;
-      await Promise.all(this.state.facts.map(fact => this.deleteFact(fact)));
+      this.state.par = player.par;
+      this.state.results = [];
+      this.state.showNextLevelButton = false;
+      const facts = [...this.state.facts];
+      this.state.facts = [];
+
+      await Promise.all(facts.map(fact => this.deleteFact(fact)));
+      
       if (this.state.level < 3) {
         this.state.constraints = levels[this.state.level - 1].constraints;
         await this.loadFacts();
         await this.test();
       }
-      this.state.par = player.par;
-      this.state.results = [];
-      this.state.showNextLevelButton = false;
     },
     restart() {
       window.localStorage.setItem('_gitclubGameSession', '');
@@ -334,13 +342,5 @@ module.exports = app => app.component('app-component', {
     }
     this.state.par = player.par;
     this.state.startTime = new Date(player.startTime);
-  },
-  async errorCaptured(err) {
-    vanillatoasts.create({
-      title: err.message,
-      icon: '/images/failure.jpg',
-      timeout: 5000,
-      positionClass: 'bottomRight'
-    });
   }
 });
