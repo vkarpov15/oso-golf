@@ -45,12 +45,17 @@ module.exports = app => app.component('app-component', {
   data: () => ({
     userId: null,
     role: null,
-    resourceType: null,
-    resourceId: null,
-    attribute: null,
-    attributeValue: null,
-    currentTime: new Date(),
-    factType: 'role'
+    attributeFact: {
+      resourceId: null,
+      attribute: null,
+      attributeValue: null
+    },
+    roleFact: {
+      resourceType: null,
+      resourceId: null,
+      role: null
+    },
+    currentTime: new Date()
   }),
   template,
   computed: {
@@ -58,10 +63,10 @@ module.exports = app => app.component('app-component', {
       return [...new Set(this.state.constraints.map(c => c.userId))];
     },
     allRoles() {
-      if (this.resourceType === 'Organization') {
+      if (this.roleFact.resourceType === 'Organization') {
         return ['admin', 'member'];
       }
-      if (this.resourceType === 'Repository') {
+      if (this.roleFact.resourceType === 'Repository') {
         return ["reader", "admin", "maintainer", "editor"];
       }
       return [
@@ -75,10 +80,10 @@ module.exports = app => app.component('app-component', {
       return ['is_public', 'is_protected'];
     },
     resourceIds() {
-      if (this.resourceType === 'Organization') {
+      if (this.roleFact.resourceType === 'Organization') {
         return this.state.organizations;
       }
-      if (this.resourceType === 'Repository') {
+      if (this.roleFact.resourceType === 'Repository') {
         return this.state.repositories;
       }
 
@@ -107,12 +112,21 @@ module.exports = app => app.component('app-component', {
         return this.state.par;
       }
       return `+${this.state.par || 0}`;
+    },
+    parForLevel() {
+      const parForLevel = levels[this.state.level - 1].par;
+      const par = this.state.facts.length - parForLevel;
+
+      return par < 0 ? par : `+${par}`;
+    },
+    level() {
+      return levels[this.state.level - 1];
     }
   },
   watch: {
-    resourceType() {
-      if (!this.allRoles.includes(this.role)) {
-        this.role = null;
+    'roleFact.resourceType'() {
+      if (!this.allRoles.includes(this.roleFact.role)) {
+        this.roleFact.role = null;
       }
     }
   },
@@ -141,56 +155,79 @@ module.exports = app => app.component('app-component', {
       this.state.level = 1;
       this.state.currentTime = new Date();
       this.state.startTime = new Date(player.startTime);
+      await this.test();
     },
-    async tell() {
-      if (this.factType === 'role') {
-        if (!this.userId || !this.role || !this.resourceType || !this.resourceId) {
-          vanillatoasts.create({
-            title: 'Missing a required field',
-            icon: '/images/failure.jpg',
-            timeout: 5000,
-            positionClass: 'bottomRight'
-          });
-          return;
-        }
-      } else if (this.factType === 'attribute') {
-        if (!this.resourceType || !this.resourceId || !this.attribute || this.attributeValue == null) {
-          vanillatoasts.create({
-            title: 'Missing a required field',
-            icon: '/images/failure.jpg',
-            timeout: 5000,
-            positionClass: 'bottomRight'
-          });
-          return;
-        }
+    async addRoleFact() {
+      const { roleFact } = this;
+      if (!this.userId || !roleFact.role || !roleFact.resourceType || !roleFact.resourceId) {
+        vanillatoasts.create({
+          title: 'Missing a required field',
+          icon: '/images/failure.jpg',
+          timeout: 5000,
+          positionClass: 'bottomRight'
+        });
+        return;
       }
+
+      const factType = 'role';
       await axios.put('/.netlify/functions/tell', {
         sessionId: this.state.sessionId,
-        factType: this.factType,
+        factType,
         userId: this.userId,
-        role: this.role,
-        resourceType: this.resourceType,
-        resourceId: this.resourceId,
-        attribute: this.attribute,
-        attributeValue: this.attributeValue
+        role: this.roleFact.role,
+        resourceType: this.roleFact.resourceType,
+        resourceId: this.roleFact.resourceId
       }).then(res => res.data);
       this.state.facts.push({
-        factType: this.factType,
+        factType,
         userId: this.userId,
-        role: this.role,
-        resourceType: this.resourceType,
-        resourceId: this.resourceId,
-        attribute: this.attribute,
-        attributeValue: this.attributeValue
+        ...this.roleFact
       });
+      this.roleFact = {
+        resourceType: null,
+        resourceId: null,
+        role: null
+      };
       this.userId = null;
-      this.role = null;
-      if (this.factType !== 'attribute') {
-        this.resourceType = null;
+
+      await this.test();
+    },
+    async addAttributeFact() {
+      const { attributeFact } = this;
+      if (!attributeFact.resourceId || !attributeFact.attribute || attributeFact.attributeValue == null) {
+        vanillatoasts.create({
+          title: 'Missing a required field',
+          icon: '/images/failure.jpg',
+          timeout: 5000,
+          positionClass: 'bottomRight'
+        });
+        return;
       }
-      this.resourceId = null;
-      this.attribute = null;
-      this.attributeValue = null;
+
+      const resourceType = 'Repository';
+      const factType = 'attribute';
+      await axios.put('/.netlify/functions/tell', {
+        sessionId: this.state.sessionId,
+        factType,
+        userId: this.userId,
+        resourceType,
+        ...this.attributeFact
+      }).then(res => res.data);
+      this.state.facts.push({
+        factType,
+        userId: this.userId,
+        resourceType,
+        ...this.attributeFact
+      });
+      this.attributeFact = {
+        resourceId: null,
+        attribute: null,
+        attributeValue: null
+      };
+      
+      this.userId = null;
+
+      await this.test();
     },
     async deleteFact(fact) {
       await axios.put('/.netlify/functions/deleteFact', {
@@ -198,9 +235,11 @@ module.exports = app => app.component('app-component', {
         ...fact
       }).then(res => res.data);
       this.state.facts = this.state.facts.filter(f => fact !== f);
+      await this.test();
     },
     async test() {
       this.state.results = [];
+      this.state.showNextLevelButton = null;
       let passed = true;
       for (const constraint of this.state.constraints) {
         const resourceId = constraint.resourceType === 'Repository' ?
@@ -221,9 +260,13 @@ module.exports = app => app.component('app-component', {
           passed = false;
         }
       }
-      if (passed) {
-        this.state.showNextLevelButton = true;
+      this.state.showNextLevelButton = passed;
+    },
+    displayImageForTestResult(index) {
+      if (!this.state.results[index]) {
+        return '/images/loader.gif';
       }
+      return this.state.results[index].pass ? '/images/check-green.svg' : '/images/error-red.svg';
     },
     async verifySolutionForLevel() {
       const { player } = await axios.post('/.netlify/functions/verifySolutionForLevel', {
@@ -235,6 +278,7 @@ module.exports = app => app.component('app-component', {
       if (this.state.level < 3) {
         this.state.constraints = levels[this.state.level - 1].constraints;
         await this.loadFacts();
+        await this.test();
       }
       this.state.par = player.par;
       this.state.results = [];
@@ -286,6 +330,7 @@ module.exports = app => app.component('app-component', {
     if (this.state.level < 3) {
       this.state.constraints = levels[this.state.level - 1].constraints;
       await this.loadFacts();
+      await this.test();
     }
     this.state.par = player.par;
     this.state.startTime = new Date(player.startTime);
