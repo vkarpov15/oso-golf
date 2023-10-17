@@ -1,7 +1,14 @@
 <div class="px-2 py-1">
-  <div class="text-4xl font-bold tracking-tight sm:text-6xl mb-0.5">Oso Golf</div>
+  <div class="text-4xl font-bold tracking-tight sm:text-6xl mb-0.5 flex gap-2">
+    <div>
+      <img class="h-[1em]" src="https://ui.osohq.com/logo-bear-black.png">
+    </div>
+    <div>
+      Oso Golf
+    </div>
+  </div>
   <div class="mb-4">
-    Find the minimum number of Oso facts to satisfy the following constraints as fast as you can!
+    Read the Oso policy below, and then add Oso facts to satisfy the given constraints as fast as you can!
   </div>
   <div v-show="state.level === 0">
     <div>
@@ -31,7 +38,7 @@
       </async-button>
     </div>
   </div>
-  <div v-show="state.level === 1 || state.level === 2">
+  <div v-show="state.level < levels.length + 1">
     <div class="flex gap-10 mb-3">
       <div><b>Hole:</b> {{state.level}} / 2</div>
       <div><b>Par Total:</b> {{par}}</div>
@@ -44,11 +51,17 @@
     </div>
     <div class="flex gap-10">
       <div class="w-[40%] h-[80vh]">
+        <div class="text-2xl font-bold leading-9 tracking-tight mt-1" v-if="level">
+          Oso Policy
+        </div>
         <pre><code class="language-javascript" v-text="polarCode" ref="codeSnippet"></code></pre>
       </div>
       <div class="w-[60%]">
         <div class="text-2xl font-bold leading-9 tracking-tight mt-1" v-if="level">
           Hole {{state.level}} (Par {{level.par}})
+        </div>
+        <div>
+          {{level?.description}}
         </div>
         <div>
           <div class="text-xl font-bold leading-9 tracking-tight mt-1">Constraints</div>
@@ -85,72 +98,76 @@
           
           <div class="bg-gray-50 shadow sm:rounded-lg mt-3">
             <div class="px-4 py-5 sm:p-6">
-              <div class="font-bold leading-9 tracking-tight mt-1">
-                Add Role
+              <div v-show="level?.showAddRoleFact">
+                <div class="font-bold leading-9 tracking-tight mt-1">
+                  Add Role
+                </div>
+                User
+                <select
+                  v-model="userId"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  <option v-for="user in allUsers" :value="user" v-text="user" />
+                </select>
+                has role
+                <select
+                  v-model="roleFact.role"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  <option v-for="role in allRoles" :value="role" v-text="role" />
+                </select>
+                on resource
+                <select
+                  v-model="roleFact.resourceType"
+                  class="mr-1 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  <option
+                    v-for="resource in allResources"
+                    :value="resource"
+                    v-text="resource" />
+                </select>
+                <select
+                  v-model="roleFact.resourceId"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  <option v-for="resource in resourceIds" :value="resource" v-text="resource" />
+                </select>
+                <async-button
+                  @click="addRoleFact"
+                  class="ml-1 rounded bg-indigo-600 px-2 py-1 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                  Add Role
+                </async-button>
               </div>
-              User
-              <select
-                v-model="userId"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option v-for="user in allUsers" :value="user" v-text="user" />
-              </select>
-              has role
-              <select
-                v-model="roleFact.role"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option v-for="role in allRoles" :value="role" v-text="role" />
-              </select>
-              on resource
-              <select
-                v-model="roleFact.resourceType"
-                class="mr-1 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option
-                  v-for="resource in allResources"
-                  :value="resource"
-                  v-text="resource" />
-              </select>
-              <select
-                v-model="roleFact.resourceId"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option v-for="resource in resourceIds" :value="resource" v-text="resource" />
-              </select>
-              <async-button
-                @click="addRoleFact"
-                class="ml-1 rounded bg-indigo-600 px-2 py-1 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                Add Role
-              </async-button>
 
-              <div class="font-bold leading-9 tracking-tight mt-3">
+              <div v-show="level?.showAddAttributeFact">
+                <div class="font-bold leading-9 tracking-tight mt-3">
+                  Add Attribute
+                </div>
+                Repository
+                <select
+                  v-model="attributeFact.resourceId"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  <option v-for="resource in state.repositories"
+                    :value="resource"
+                    v-text="resource" />
+                </select>
+                has attribute
+                <select
+                  v-model="attributeFact.attribute"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  <option
+                    v-for="attr in allAttributes"
+                    :value="attr"
+                    v-text="attr" />
+                </select>
+                set to
+                <select
+                  v-model="attributeFact.attributeValue"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  <option v-for="v in [true, false]" :value="v" v-text="v" />
+                </select>
+                <async-button
+                  @click="addAttributeFact"
+                  class="ml-1 rounded bg-indigo-600 px-2 py-1 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
                 Add Attribute
+                </async-button>
               </div>
-              Repository
-              <select
-                v-model="attributeFact.resourceId"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option v-for="resource in state.repositories"
-                  :value="resource"
-                  v-text="resource" />
-              </select>
-              has attribute
-              <select
-                v-model="attributeFact.attribute"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option
-                  v-for="attr in allAttributes"
-                  :value="attr"
-                  v-text="attr" />
-              </select>
-              set to
-              <select
-                v-model="attributeFact.attributeValue"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option v-for="v in [true, false]" :value="v" v-text="v" />
-              </select>
-              <async-button
-                @click="addAttributeFact"
-                class="ml-1 rounded bg-indigo-600 px-2 py-1 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-              Add Attribute
-              </async-button>
             </div>
           </div>
         </div>
@@ -174,12 +191,12 @@
             </div>
             <div
               class="inline inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-blue-700/10"
-              v-if="parForLevel === 0">
+              v-if="+parForLevel === 0">
               Par
             </div>
             <div
               class="inline inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-yellow-600/20"
-              v-if="parForLevel > 0">
+              v-if="+parForLevel > 0">
               Over
             </div>
           </div>
@@ -190,7 +207,7 @@
       </div>
     </div>
   </div>
-  <div v-show="state.level === 3">
+  <div v-show="state.level >= levels.length + 1">
     <div class="text-2xl font-bold leading-9 tracking-tight">
       You completed the game!
     </div>

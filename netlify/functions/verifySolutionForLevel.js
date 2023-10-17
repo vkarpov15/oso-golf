@@ -5,6 +5,7 @@ const Player = require('../../db/player');
 const assert = require('assert');
 const connect = require('../../db/connect');
 const extrovert = require('extrovert');
+const levels = require('../../levels');
 const oso = require('../../oso');
 
 const VerifySolutionForLevelParams = new Archetype({
@@ -15,7 +16,7 @@ const VerifySolutionForLevelParams = new Archetype({
   level: {
     $type: 'number',
     $required: true,
-    $validate: v => assert.ok(v > 0 && v < 3)
+    $validate: v => assert.ok(v > 0 && v <= levels.length)
   }
 }).compile('VerifySolutionForLevelParams');
 

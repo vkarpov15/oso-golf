@@ -5,17 +5,26 @@ const levels = require('../../levels');
 const template = require('./app-component.html')
 const vanillatoasts = require('vanillatoasts');
 
-const polarCode = `
+const defaultPolarCode = `
 actor User { }
 
 resource Organization { 
     roles = ["admin", "member"];
+    permissions = ["read", "add_member"];
 
+    # role hierarchy:
+    # admins inherit all member permissions
     "member" if "admin";
+
+    # org-level permissions
+    "read" if "member";
+    "add_member" if "admin";
 }
 
 resource Repository { 
-    permissions = ["read", "write", "delete"];
+    permissions = [
+        "read", "write", "delete"
+    ];
     roles = ["reader", "admin", "maintainer", "editor"];
     relations = { organization: Organization };
 
@@ -34,6 +43,7 @@ resource Repository {
 
 has_permission(_: Actor, "read", repo: Repository) if
     is_public(repo, true);
+
 
 has_permission(actor: Actor, "delete", repo: Repository) if
     has_role(actor, "admin", repo) and
@@ -91,7 +101,9 @@ module.exports = app => app.component('app-component', {
       return [];
     },
     polarCode() {
-      return polarCode;
+      return levels[this.state.level - 1]?.polarCode
+        ? levels[this.state.level - 1].polarCode
+        : defaultPolarCode;
     },
     elapsedTime() {
       if (!this.state.startTime) {
@@ -119,6 +131,9 @@ module.exports = app => app.component('app-component', {
       const par = this.state.facts.length - parForLevel;
 
       return par < 0 ? par : `+${par}`;
+    },
+    levels() {
+      return levels;
     },
     level() {
       return levels[this.state.level - 1];
@@ -286,7 +301,7 @@ module.exports = app => app.component('app-component', {
 
       await Promise.all(facts.map(fact => this.deleteFact(fact)));
       
-      if (this.state.level < 3) {
+      if (this.state.level < levels.length + 1) {
         this.state.constraints = levels[this.state.level - 1].constraints;
         await this.loadFacts();
         await this.test();
@@ -335,12 +350,13 @@ module.exports = app => app.component('app-component', {
       return;
     }
     this.state.level = player.levelsCompleted + 1;
-    if (this.state.level < 3) {
+    if (this.state.level < levels.length + 1) {
       this.state.constraints = levels[this.state.level - 1].constraints;
       await this.loadFacts();
       await this.test();
     }
     this.state.par = player.par;
     this.state.startTime = new Date(player.startTime);
+    this.status = 'loaded';
   }
 });
