@@ -38,7 +38,7 @@
       </async-button>
     </div>
   </div>
-  <div v-show="state.level < levels.length + 1">
+  <div v-show="state.level > 0 && state.level < levels.length + 1">
     <div class="flex gap-10 mb-3">
       <div><b>Hole:</b> {{state.level}} / 2</div>
       <div><b>Par Total:</b> {{par}}</div>
