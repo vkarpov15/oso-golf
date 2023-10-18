@@ -154,4 +154,44 @@ const level4 = {
   `)
 };
 
-module.exports = [level1, level2, level3, level4];
+const level5 = {
+  constraints: [
+    { userId: 'Elaine', action: 'add_member', resourceType: 'Organization', resourceId: 'osohq' },
+    { userId: 'Elaine', action: 'add_member', resourceType: 'Organization', resourceId: 'acme' },
+    { userId: 'Elizabeth', action: 'add_member', resourceType: 'Organization', resourceId: 'osohq' },
+    { userId: 'Elizabeth', action: 'add_member', resourceType: 'Organization', resourceId: 'acme', shouldFail: true },
+    { userId: 'Ellis', action: 'add_member', resourceType: 'Organization', resourceId: 'osohq', shouldFail: true },
+    { userId: 'Ellis', action: 'add_member', resourceType: 'Organization', resourceId: 'acme' }
+  ],
+  par: 4,
+  polarCode: dedent(`
+  actor User { }
+
+  global {
+    roles = ["superadmin"];
+  }
+
+  resource Organization { 
+      roles = ["admin", "member"];
+      permissions = ["read", "add_member"];
+
+      # role hierarchy:
+      # admins inherit all member permissions
+      "member" if "admin";
+
+      "admin" if global "superadmin";
+
+      # org-level permissions
+      "read" if "member";
+      "add_member" if "admin";
+  }
+  `),
+  showAddRoleFact: true,
+  showAddAttributeFact: true,
+  description: dedent(`
+  You can also have global roles that can apply to all resources.
+  In this hole, take advantage of the superadmin role
+  `)
+};
+
+module.exports = [level1, level2, level3, level4, level5];

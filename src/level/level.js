@@ -84,7 +84,7 @@ module.exports = app => app.component('level', {
         return ['reader', 'admin', 'maintainer', 'editor'];
       }
       return [
-        'reader', 'admin', 'maintainer', 'editor', 'member'
+        'reader', 'admin', 'maintainer', 'editor', 'member', 'superadmin'
       ];
     },
     allResources() {
@@ -114,6 +114,9 @@ module.exports = app => app.component('level', {
       const par = this.state.facts.length - parForLevel;
 
       return par < 0 ? par : `+${par}`;
+    },
+    isGlobalRole() {
+      return this.roleFact.role === 'superadmin';
     }
   },
   watch: {
@@ -126,7 +129,7 @@ module.exports = app => app.component('level', {
   methods: {
     async addRoleFact() {
       const { roleFact } = this;
-      if (!this.userId || !roleFact.role || !roleFact.resourceType || !roleFact.resourceId) {
+      if (!this.userId || !roleFact.role || ((!roleFact.resourceType || !roleFact.resourceId) && !this.isGlobalRole)) {
         vanillatoasts.create({
           title: 'Missing a required field',
           icon: '/images/failure.jpg',
@@ -195,6 +198,12 @@ module.exports = app => app.component('level', {
       this.userId = null;
 
       await this.onTest();
+    },
+    displayRoleFact(fact) {
+      if (fact.role === 'superadmin') {
+        return `User ${fact.userId} has role ${fact.role}`;
+      }
+      return `User ${fact.userId} has role ${fact.role} on ${fact.resourceType} ${fact.resourceId}`;
     },
     async deleteFact(fact) {
       await axios.put('/.netlify/functions/deleteFact', {

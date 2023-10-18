@@ -105,8 +105,8 @@ module.exports = app => app.component('app-component', {
           factType: 'role',
           userId: fact[1].id.replace(this.state.sessionId, '').replace(/^_/, ''),
           role: fact[2],
-          resourceType: fact[3].type,
-          resourceId: fact[3].id.replace(this.state.sessionId, '').replace(/^_/, '')
+          resourceType: fact[3]?.type,
+          resourceId: fact[3]?.id?.replace(this.state.sessionId, '')?.replace(/^_/, '')
         } : {
           factType: 'attribute',
           attribute: fact[0],

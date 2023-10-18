@@ -25,11 +25,11 @@ const TellParams = new Archetype({
   },
   resourceType: {
     $type: 'string',
-    $required: true
+    $required: (doc) => doc.role !== 'superadmin'
   },
   resourceId: {
     $type: 'string',
-    $required: true
+    $required: (doc) => doc.role !== 'superadmin'
   },
   attribute: {
     $type: 'string',
@@ -50,12 +50,21 @@ module.exports = extrovert.toNetlifyFunction(async params => {
 
   if (params.factType === 'role') {
     const resourceId = params.resourceType === 'Repository' ? `${params.sessionId}_${params.resourceId}` : params.resourceId;
-    await oso.tell(
-      'has_role',
-      { type: 'User', id: `${params.sessionId}_${params.userId}` },
-      params.role,
-      { type: params.resourceType, id: resourceId }
-    );
+    
+    if (params.role === 'superadmin') {
+      await oso.tell(
+        'has_role',
+        { type: 'User', id: `${params.sessionId}_${params.userId}` },
+        params.role
+      );
+    } else {
+      await oso.tell(
+        'has_role',
+        { type: 'User', id: `${params.sessionId}_${params.userId}` },
+        params.role,
+        { type: params.resourceType, id: resourceId }
+      );
+    }
   } else {
     await oso.tell(
       params.attribute,
