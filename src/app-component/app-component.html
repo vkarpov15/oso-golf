@@ -15,7 +15,7 @@
   </div>
   <div v-show="state.level > 0 && state.level < levels.length + 1">
     <div class="flex gap-10 mb-3">
-      <div><b>Hole:</b> {{state.level}} / 2</div>
+      <div><b>Hole:</b> {{state.level}} / {{levels.length}}</div>
       <div><b>Par Total:</b> {{par}}</div>
       <div class="grow shrink basis-0"><b>Time Elapsed:</b> {{elapsedTime}}</div>
       <div style="width: 60%; padding-left: 1.5rem">

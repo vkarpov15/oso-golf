@@ -105,4 +105,53 @@ const level3 = {
   `)
 };
 
-module.exports = [level1, level2, level3];
+const level4 = {
+  constraints: [
+    { userId: 'David', action: 'read', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
+    { userId: 'David', action: 'read', resourceType: 'Repository', resourceId: 'osohq/configs' },
+    { userId: 'Daisy', action: 'read', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
+    { userId: 'Daisy', action: 'read', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true },
+    { userId: 'Damir', action: 'read', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
+    { userId: 'Damir', action: 'read', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true }
+  ],
+  par: 4,
+  polarCode: dedent(`
+  actor User { }
+
+  resource Organization { 
+      roles = ["admin", "member"];
+  }
+
+  resource Repository { 
+    permissions = [
+        "read", "write", "delete"
+    ];
+    roles = ["reader", "admin", "maintainer", "editor"];
+    relations = { organization: Organization };
+
+    "reader" if "member" on "organization";
+    "admin" if "admin" on "organization";
+    "reader" if "editor";
+    "editor" if "maintainer";
+    "maintainer" if "admin";
+
+    # reader permissions
+    "read" if "reader";
+
+    # editor permissions
+    "write" if "editor";
+  }
+
+  has_permission(_: Actor, "read", repo: Repository) if
+    is_public(repo, true);
+  `),
+  showAddRoleFact: true,
+  showAddAttributeFact: true,
+  description: dedent(`
+  Roles aren't the only type of fact you can add in Oso Cloud.
+  You can also add attributes to resources.
+  For this hole, use the <code>is_public</code> fact.
+  `)
+};
+
+module.exports = [level1, level2, level3, level4];
