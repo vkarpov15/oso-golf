@@ -36,7 +36,8 @@ const level2 = {
   constraints: [
     { userId: 'Bob', action: 'read', resourceType: 'Organization', resourceId: 'osohq' },
     { userId: 'Bob', action: 'add_member', resourceType: 'Organization', resourceId: 'osohq' },
-    { userId: 'Bill', action: 'read', resourceType: 'Organization', resourceId: 'osohq' }
+    { userId: 'Bill', action: 'read', resourceType: 'Organization', resourceId: 'osohq' },
+    { userId: 'Bill', action: 'add_member', resourceType: 'Organization', resourceId: 'osohq', shouldFail: true }
   ],
   par: 2,
   polarCode: dedent(`
