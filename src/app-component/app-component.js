@@ -2,112 +2,19 @@
 
 const axios = require('axios');
 const levels = require('../../levels');
-const template = require('./app-component.html')
-const vanillatoasts = require('vanillatoasts');
-
-const defaultPolarCode = `
-actor User { }
-
-resource Organization { 
-    roles = ["admin", "member"];
-    permissions = ["read", "add_member"];
-
-    # role hierarchy:
-    # admins inherit all member permissions
-    "member" if "admin";
-
-    # org-level permissions
-    "read" if "member";
-    "add_member" if "admin";
-}
-
-resource Repository { 
-    permissions = [
-        "read", "write", "delete"
-    ];
-    roles = ["reader", "admin", "maintainer", "editor"];
-    relations = { organization: Organization };
-
-    "reader" if "member" on "organization";
-    "admin" if "admin" on "organization";
-    "reader" if "editor";
-    "editor" if "maintainer";
-    "maintainer" if "admin";
-
-    # reader permissions
-    "read" if "reader";
-
-    # editor permissions
-    "write" if "editor";
-}
-
-has_permission(_: Actor, "read", repo: Repository) if
-    is_public(repo, true);
-
-
-has_permission(actor: Actor, "delete", repo: Repository) if
-    has_role(actor, "admin", repo) and
-    is_protected(repo, false);
-`.trim();
+const template = require('./app-component.html');
 
 module.exports = app => app.component('app-component', {
   inject: ['state'],
   data: () => ({
-    userId: null,
-    role: null,
-    attributeFact: {
-      resourceId: null,
-      attribute: null,
-      attributeValue: null
-    },
-    roleFact: {
-      resourceType: null,
-      resourceId: null,
-      role: null
-    },
     currentTime: new Date(),
     status: 'loading'
   }),
   template,
   computed: {
-    allUsers() {
-      return [...new Set(this.state.constraints.map(c => c.userId))];
-    },
-    allRoles() {
-      if (this.roleFact.resourceType === 'Organization') {
-        return ['admin', 'member'];
-      }
-      if (this.roleFact.resourceType === 'Repository') {
-        return ["reader", "admin", "maintainer", "editor"];
-      }
-      return [
-        "reader", "admin", "maintainer", "editor", "member"
-      ];
-    },
-    allResources() {
-      return ['Organization', 'Repository'];
-    },
-    allAttributes() {
-      return ['is_public', 'is_protected'];
-    },
-    resourceIds() {
-      if (this.roleFact.resourceType === 'Organization') {
-        return this.state.organizations;
-      }
-      if (this.roleFact.resourceType === 'Repository') {
-        return this.state.repositories;
-      }
-
-      return [];
-    },
-    polarCode() {
-      return levels[this.state.level - 1]?.polarCode
-        ? levels[this.state.level - 1].polarCode
-        : defaultPolarCode;
-    },
     elapsedTime() {
       if (!this.state.startTime) {
-        return `0:00`;
+        return '0:00';
       }
       const ms = this.currentTime.valueOf() - this.state.startTime.valueOf();
       const seconds = Math.floor((ms / 1000) % 60);
@@ -126,20 +33,8 @@ module.exports = app => app.component('app-component', {
       }
       return `+${this.state.par || 0}`;
     },
-    parForLevel() {
-      const parForLevel = levels[this.state.level - 1].par;
-      const par = this.state.facts.length - parForLevel;
-
-      return par < 0 ? par : `+${par}`;
-    },
     levels() {
       return levels;
-    },
-    level() {
-      return levels[this.state.level - 1];
-    },
-    testsInProgress() {
-      return this.state.constraints.length > 0 && this.state.constraints.length !== this.state.results.length;
     }
   },
   watch: {
@@ -150,112 +45,6 @@ module.exports = app => app.component('app-component', {
     }
   },
   methods: {
-    async startGame() {
-      if (this.state.level !== 0) {
-        return;
-      }
-      this.state.errors = {};
-      if (!this.state.email) {
-        this.state.errors.email = 'Email is required';
-      }
-      if (!this.state.name) {
-        this.state.errors.name = 'Name is required';
-      }
-      if (Object.keys(this.state.errors).length > 0) {
-        return;
-      }
-
-      const { player } = await axios.post('/.netlify/functions/startGame', {
-        sessionId: this.state.sessionId,
-        name: this.state.name,
-        email: this.state.email
-      }).then(res => res.data);
-
-      this.state.level = 1;
-      this.state.currentTime = new Date();
-      this.state.startTime = new Date(player.startTime);
-      await this.test();
-    },
-    async addRoleFact() {
-      const { roleFact } = this;
-      if (!this.userId || !roleFact.role || !roleFact.resourceType || !roleFact.resourceId) {
-        vanillatoasts.create({
-          title: 'Missing a required field',
-          icon: '/images/failure.jpg',
-          timeout: 5000,
-          positionClass: 'bottomRight'
-        });
-        return;
-      }
-
-      const factType = 'role';
-      await axios.put('/.netlify/functions/tell', {
-        sessionId: this.state.sessionId,
-        factType,
-        userId: this.userId,
-        role: this.roleFact.role,
-        resourceType: this.roleFact.resourceType,
-        resourceId: this.roleFact.resourceId
-      }).then(res => res.data);
-      this.state.facts.push({
-        factType,
-        userId: this.userId,
-        ...this.roleFact
-      });
-      this.roleFact = {
-        resourceType: null,
-        resourceId: null,
-        role: null
-      };
-      this.userId = null;
-
-      await this.test();
-    },
-    async addAttributeFact() {
-      const { attributeFact } = this;
-      if (!attributeFact.resourceId || !attributeFact.attribute || attributeFact.attributeValue == null) {
-        vanillatoasts.create({
-          title: 'Missing a required field',
-          icon: '/images/failure.jpg',
-          timeout: 5000,
-          positionClass: 'bottomRight'
-        });
-        return;
-      }
-
-      const resourceType = 'Repository';
-      const factType = 'attribute';
-      await axios.put('/.netlify/functions/tell', {
-        sessionId: this.state.sessionId,
-        factType,
-        userId: this.userId,
-        resourceType,
-        ...this.attributeFact
-      }).then(res => res.data);
-      this.state.facts.push({
-        factType,
-        userId: this.userId,
-        resourceType,
-        ...this.attributeFact
-      });
-      this.attributeFact = {
-        resourceId: null,
-        attribute: null,
-        attributeValue: null
-      };
-      
-      this.userId = null;
-
-      await this.test();
-    },
-    async deleteFact(fact) {
-      await axios.put('/.netlify/functions/deleteFact', {
-        sessionId: this.state.sessionId,
-        ...fact
-      }).then(res => res.data);
-      this.state.facts = this.state.facts.filter(f => fact !== f);
-      await this.test();
-    },
     async test() {
       this.state.results = [];
       this.state.showNextLevelButton = null;
@@ -280,12 +69,6 @@ module.exports = app => app.component('app-component', {
         }
       }
       this.state.showNextLevelButton = passed;
-    },
-    displayImageForTestResult(index) {
-      if (!this.state.results[index]) {
-        return '/images/loader.gif';
-      }
-      return this.state.results[index].pass ? '/images/check-green.svg' : '/images/error-red.svg';
     },
     async verifySolutionForLevel() {
       const { player } = await axios.post('/.netlify/functions/verifySolutionForLevel', {
@@ -338,8 +121,6 @@ module.exports = app => app.component('app-component', {
     setInterval(() => {
       this.currentTime = new Date();
     }, 500);
-
-    Prism.highlightElement(this.$refs.codeSnippet);
 
     const { player } = await axios.get('/.netlify/functions/resumeGame', {
       params: {

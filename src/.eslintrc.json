@@ -1,0 +1,10 @@
+{
+  "env": {
+    "browser": true
+  },
+  "globals": {
+    "Prism": true,
+    "Vue": true,
+    "VueRouter": true
+  }
+}

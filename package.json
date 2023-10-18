@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "build": "node ./build",
+    "lint": "eslint .",
     "tailwind": "tailwindcss -o ./public/style.css",
     "tailwind:watch": "tailwindcss -o ./public/style.css --watch"
   },

@@ -1,7 +1,7 @@
 'use strict';
 
 const axios = require('axios');
-const template = require('./leaderboard.html')
+const template = require('./leaderboard.html');
 
 module.exports = app => app.component('leaderboard', {
   inject: ['state'],

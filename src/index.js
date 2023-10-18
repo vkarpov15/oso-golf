@@ -4,6 +4,7 @@ const sessionId = window.localStorage.getItem('_gitclubGameSession') || [...Arra
 console.log(sessionId);
 window.localStorage.setItem('_gitclubGameSession', sessionId);
 
+const components = require('./components');
 const levels = require('../levels');
 const vanillatoasts = require('vanillatoasts');
 
@@ -48,9 +49,9 @@ const app = Vue.createApp({
   }
 });
 
-require('./app-component/app-component')(app);
-require('./async-button/async-button')(app);
-require('./leaderboard/leaderboard')(app);
+for (const component of Object.values(components)) {
+  component(app);
+}
 
 const router = VueRouter.createRouter({
   history: VueRouter.createWebHistory(),

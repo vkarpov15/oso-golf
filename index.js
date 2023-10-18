@@ -35,7 +35,7 @@ app.use('/.netlify/functions', express.json(), function netlifyFunctionsMiddlewa
       if (result.statusCode >= 400) {
         return res.status(400).json({ message: result.body });
       }
-      res.json(JSON.parse(result.body))
+      res.json(JSON.parse(result.body));
     }).
     catch(err => res.status(500).json({ message: err.message, stack: err.stack }));
 });

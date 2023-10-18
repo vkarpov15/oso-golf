@@ -4,7 +4,7 @@ const Player = require('../../db/player');
 const connect = require('../../db/connect');
 const extrovert = require('extrovert');
 
-module.exports = extrovert.toNetlifyFunction(async () => {
+module.exports = extrovert.toNetlifyFunction(async() => {
   await connect();
   
   const players = await Player
