@@ -1,0 +1,10 @@
+<div>
+  <div class="text-xl font-bold leading-9 tracking-tight mt-1">Constraints</div>
+    <div v-for="(constraint, index) in state.constraints">
+      <img class="inline w-[24px]" v-show="displayImageForTestResult(index)" :src="displayImageForTestResult(index)">
+      {{constraint.userId}} {{constraint.shouldFail ? 'cannot' : 'can'}} {{constraint.action}} {{constraint.resourceType}} {{constraint.resourceId}}
+    </div>
+    <div class="text-sm text-gray-500 mt-1">
+      {{testsInProgress ? 'Tests running on Oso Cloud...' : 'Tests ran successfully on Oso Cloud'}}
+    </div>
+</div>
