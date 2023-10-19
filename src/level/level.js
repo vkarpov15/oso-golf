@@ -127,9 +127,11 @@ module.exports = app => app.component('level', {
     }
   },
   methods: {
-    async addRoleFact() {
-      const { roleFact } = this;
-      if (!this.userId || !roleFact.role || ((!roleFact.resourceType || !roleFact.resourceId) && !this.isGlobalRole)) {
+    async addRoleFact(propsToReset, updates) {
+      console.log('what is updates', updates);
+      const { roleFact, userId } = updates;
+      console.log('what is roleFact', roleFact);
+      if (!userId || !roleFact.role || ((!roleFact.resourceType || !roleFact.resourceId) && !this.isGlobalRole)) {
         vanillatoasts.create({
           title: 'Missing a required field',
           icon: '/images/failure.jpg',
@@ -143,22 +145,16 @@ module.exports = app => app.component('level', {
       await axios.put('/.netlify/functions/tell', {
         sessionId: this.state.sessionId,
         factType,
-        userId: this.userId,
-        role: this.roleFact.role,
-        resourceType: this.roleFact.resourceType,
-        resourceId: this.roleFact.resourceId
+        userId: userId,
+        role: roleFact.role,
+        resourceType: roleFact.resourceType,
+        resourceId: roleFact.resourceId
       }).then(res => res.data);
       this.state.facts.push({
         factType,
-        userId: this.userId,
-        ...this.roleFact
+        userId: userId,
+        ...roleFact
       });
-      this.roleFact = {
-        resourceType: null,
-        resourceId: null,
-        role: null
-      };
-      this.userId = null;
 
       await this.onTest();
     },
