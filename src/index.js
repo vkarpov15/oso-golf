@@ -25,6 +25,7 @@ const app = Vue.createApp({
       facts: [],
       sessionId,
       level: 0,
+      currentLevel: null,
       par: 0,
       startTime: null,
       errors: {},

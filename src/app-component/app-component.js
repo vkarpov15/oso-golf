@@ -86,6 +86,7 @@ module.exports = app => app.component('app-component', {
       
       if (this.state.level < levels.length + 1) {
         this.state.constraints = levels[this.state.level - 1].constraints;
+        this.state.currentLevel = levels[this.state.level - 1];
         await this.loadFacts();
         await this.test();
       }
@@ -133,6 +134,7 @@ module.exports = app => app.component('app-component', {
     this.state.level = player.levelsCompleted + 1;
     if (this.state.level < levels.length + 1) {
       this.state.constraints = levels[this.state.level - 1].constraints;
+      this.state.currentLevel = levels[this.state.level - 1];
       await this.loadFacts();
       await this.test();
     }

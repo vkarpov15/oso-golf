@@ -26,6 +26,7 @@ const level1 = {
   `),
   showAddRoleFact: true,
   showAddAttributeFact: false,
+  allowedRoles: ['admin', 'member'],
   description: dedent(`
   The basic logic of RBAC is: "a user has a permission if they are granted a role and the role grants that permission".
   Add roles to users to satisfy the below constraints.

@@ -16,6 +16,6 @@ module.exports = app => app.component('constraints', {
   computed: {
     testsInProgress() {
       return this.state.constraints.length > 0 && this.state.constraints.length !== this.state.results.length;
-    },
+    }
   }
 });

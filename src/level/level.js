@@ -128,9 +128,7 @@ module.exports = app => app.component('level', {
   },
   methods: {
     async addRoleFact(propsToReset, updates) {
-      console.log('what is updates', updates);
       const { roleFact, userId } = updates;
-      console.log('what is roleFact', roleFact);
       if (!userId || !roleFact.role || ((!roleFact.resourceType || !roleFact.resourceId) && !this.isGlobalRole)) {
         vanillatoasts.create({
           title: 'Missing a required field',
@@ -231,6 +229,7 @@ module.exports = app => app.component('level', {
       
       if (this.state.level < levels.length + 1) {
         this.state.constraints = levels[this.state.level - 1].constraints;
+        this.state.currentLevel = levels[this.state.level - 1];
         await this.onLoadFacts();
         await this.onTest();
       }

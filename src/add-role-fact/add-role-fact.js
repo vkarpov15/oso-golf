@@ -1,8 +1,10 @@
 'use strict';
 
 const template = require('./add-role-fact.html');
-const vanillatoasts = require('vanillatoasts');
-const axios = require('axios');
+
+const allRolesSet = new Set([
+  'reader', 'admin', 'maintainer', 'editor', 'member', 'superadmin'
+]);
 
 module.exports = app => app.component('add-role-fact', {
   inject: ['state'],
@@ -16,15 +18,18 @@ module.exports = app => app.component('add-role-fact', {
       return this.role === 'superadmin';
     },
     allRoles() {
+      const allowedRoles = this.state.currentLevel?.allowedRoles
+        ? new Set(this.state.currentLevel?.allowedRoles)
+        : allRolesSet;
       if (this.resourceType === 'Organization') {
-        return ['admin', 'member'];
+        return ['admin', 'member'].filter(role => allowedRoles.has(role));
       }
       if (this.resourceType === 'Repository') {
-        return ['reader', 'admin', 'maintainer', 'editor'];
+        return ['reader', 'admin', 'maintainer', 'editor'].filter(role => allowedRoles.has(role));
       }
       return [
         'reader', 'admin', 'maintainer', 'editor', 'member', 'superadmin'
-      ];
+      ].filter(role => allowedRoles.has(role));
     },
     allResources() {
       return ['Organization', 'Repository'];
@@ -38,7 +43,7 @@ module.exports = app => app.component('add-role-fact', {
       }
 
       return [];
-    },
+    }
   },
   methods: {
     async sendRoleFact() {
@@ -47,6 +52,6 @@ module.exports = app => app.component('add-role-fact', {
       this.role = '';
       this.resourceType = '';
       this.resourceId = '';
-    },
-  },
+    }
+  }
 });
