@@ -69,8 +69,8 @@ module.exports = app => app.component('level', {
   template,
   computed: {
     polarCode() {
-      return levels[this.state.level - 1]?.polarCode
-        ? levels[this.state.level - 1].polarCode
+      return this.state.currentLevel?.polarCode
+        ? this.state.currentLevel.polarCode
         : defaultPolarCode;
     },
     allUsers() {
@@ -104,13 +104,13 @@ module.exports = app => app.component('level', {
       return [];
     },
     level() {
-      return levels[this.state.level - 1];
+      return this.state.currentLevel;
     },
     testsInProgress() {
       return this.state.constraints.length > 0 && this.state.constraints.length !== this.state.results.length;
     },
     parForLevel() {
-      const parForLevel = levels[this.state.level - 1].par;
+      const parForLevel = this.state.currentLevel?.par;
       const par = this.state.facts.length - parForLevel;
 
       return par < 0 ? par : `+${par}`;
@@ -228,8 +228,8 @@ module.exports = app => app.component('level', {
       await Promise.all(facts.map(fact => this.deleteFact(fact)));
       
       if (this.state.level < levels.length + 1) {
-        this.state.constraints = levels[this.state.level - 1].constraints;
         this.state.currentLevel = levels[this.state.level - 1];
+        this.state.constraints = this.state.currentLevel.constraints;
         await this.onLoadFacts();
         await this.onTest();
       }
