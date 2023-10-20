@@ -1,0 +1,38 @@
+<div>
+  <div class="font-bold leading-9 tracking-tight mt-1">
+    Add Role
+  </div>
+  User
+  <select
+    v-model="userId"
+    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+    <option v-for="user in allUsers" :value="user" v-text="user" />
+  </select>
+  has role
+  <select
+    v-model="role"
+    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+    <option v-for="role in allRoles" :value="role" v-text="role" />
+  </select>
+  <span v-show="!isGlobalRole">
+    on resource
+    <select
+      v-model="resourceType"
+      class="mr-1 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+      <option
+        v-for="resource in allResources"
+        :value="resource"
+        v-text="resource" />
+    </select>
+    <select
+      v-model="resourceId"
+      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+      <option v-for="resource in resourceIds" :value="resource" v-text="resource" />
+    </select>
+  </span>
+  <async-button
+    @click="sendRoleFact"
+    class="ml-1 rounded bg-indigo-600 px-2 py-1 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+    Add Role
+  </async-button>
+</div>
