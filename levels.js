@@ -27,6 +27,7 @@ const level1 = {
   showAddRoleFact: true,
   showAddAttributeFact: false,
   allowedRoles: ['admin', 'member'],
+  organizations: ['osohq'],
   description: dedent(`
   The basic logic of RBAC is: "a user has a permission if they are granted a role and the role grants that permission".
   Add roles to users to satisfy the below constraints.
@@ -59,6 +60,8 @@ const level2 = {
   `),
   showAddRoleFact: true,
   showAddAttributeFact: false,
+  allowedRoles: ['admin', 'member'],
+  organizations: ['osohq'],
   description: dedent(`
   For this hole, remember that admins inherit all member permissions!
   `)
@@ -101,6 +104,9 @@ const level3 = {
   `),
   showAddRoleFact: true,
   showAddAttributeFact: false,
+  allowedRoles: ['admin', 'member', 'reader', 'editor'],
+  organizations: ['osohq'],
+  repositories: ['osohq/sample-apps', 'osohq/nodejs-client'],
   description: dedent(`
   Now let's add in a new resource type: repositories.
   Every repository belongs to an organization, and users can derive permissions from roles on a Repository or an Organization.

@@ -87,9 +87,6 @@ module.exports = app => app.component('level', {
         'reader', 'admin', 'maintainer', 'editor', 'member', 'superadmin'
       ];
     },
-    allResources() {
-      return ['Organization', 'Repository'];
-    },
     allAttributes() {
       return ['is_public', 'is_protected'];
     },

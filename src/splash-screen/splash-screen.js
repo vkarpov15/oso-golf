@@ -1,6 +1,7 @@
 'use strict';
 
 const axios = require('axios');
+const levels = require('../../levels');
 const template = require('./splash-screen.html');
 
 module.exports = app => app.component('splash-screen', {
@@ -31,6 +32,7 @@ module.exports = app => app.component('splash-screen', {
       }).then(res => res.data);
 
       this.state.level = 1;
+      this.state.currentLevel = levels[0];
       this.state.currentTime = new Date();
       this.state.startTime = new Date(player.startTime);
       await this.onStartGame();

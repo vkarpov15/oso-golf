@@ -36,10 +36,10 @@ module.exports = app => app.component('add-role-fact', {
     },
     resourceIds() {
       if (this.resourceType === 'Organization') {
-        return this.state.organizations;
+        return this.state.currentLevel?.organizations ?? this.state.organizations;
       }
       if (this.resourceType === 'Repository') {
-        return this.state.repositories;
+        return this.state.currentLevel?.repositories ?? this.state.repositories;
       }
 
       return [];
