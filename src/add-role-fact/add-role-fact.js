@@ -32,6 +32,9 @@ module.exports = app => app.component('add-role-fact', {
       ].filter(role => allowedRoles.has(role));
     },
     allResources() {
+      if (this.state.currentLevel?.repositories?.length === 0) {
+        return ['Organization'];
+      }
       return ['Organization', 'Repository'];
     },
     resourceIds() {
@@ -47,7 +50,20 @@ module.exports = app => app.component('add-role-fact', {
   },
   methods: {
     async sendRoleFact() {
-      await this.$attrs.onAddRoleFact({ roleFact: { role: this.role, resourceType: this.resourceType, resourceId: this.resourceId }, userId: this.userId });
+      if (!this.userId || !this.role || ((!this.resourceType || !this.resourceId) && !this.isGlobalRole)) {
+        vanillatoasts.create({
+          title: 'Missing a required field',
+          icon: '/images/failure.jpg',
+          timeout: 5000,
+          positionClass: 'bottomRight'
+        });
+        return;
+      }
+
+      await this.$attrs.onAddRoleFact({
+        roleFact: { role: this.role, resourceType: this.resourceType, resourceId: this.resourceId },
+        userId: this.userId
+      });
       this.userId = '';
       this.role = '';
       this.resourceType = '';

@@ -28,6 +28,7 @@ const level1 = {
   showAddAttributeFact: false,
   allowedRoles: ['admin', 'member'],
   organizations: ['osohq'],
+  repositories: [],
   description: dedent(`
   The basic logic of RBAC is: "a user has a permission if they are granted a role and the role grants that permission".
   Add roles to users to satisfy the below constraints.
@@ -62,6 +63,7 @@ const level2 = {
   showAddAttributeFact: false,
   allowedRoles: ['admin', 'member'],
   organizations: ['osohq'],
+  repositories: [],
   description: dedent(`
   For this hole, remember that admins inherit all member permissions!
   `)
@@ -134,7 +136,7 @@ const level4 = {
     permissions = [
         "read", "write", "delete"
     ];
-    roles = ["reader", "admin", "maintainer", "editor"];
+    roles = ["reader", "admin", "editor"];
     relations = { organization: Organization };
 
     "reader" if "member" on "organization";
@@ -155,6 +157,9 @@ const level4 = {
   `),
   showAddRoleFact: true,
   showAddAttributeFact: true,
+  allowedRoles: ['admin', 'member', 'reader', 'editor'],
+  organizations: ['osohq'],
+  repositories: ['osohq/sample-apps', 'osohq/nodejs-client', 'osohq/configs'],
   description: dedent(`
   Roles aren't the only type of fact you can add in Oso Cloud.
   You can also add attributes to resources.
@@ -195,7 +200,9 @@ const level5 = {
   }
   `),
   showAddRoleFact: true,
-  showAddAttributeFact: true,
+  showAddAttributeFact: false,
+  organizations: ['osohq', 'acme'],
+  repositories: [],
   description: dedent(`
   You can also have global roles that can apply to all resources.
   In this hole, take advantage of the superadmin role

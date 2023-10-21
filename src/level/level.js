@@ -126,15 +126,6 @@ module.exports = app => app.component('level', {
   methods: {
     async addRoleFact(propsToReset, updates) {
       const { roleFact, userId } = updates;
-      if (!userId || !roleFact.role || ((!roleFact.resourceType || !roleFact.resourceId) && !this.isGlobalRole)) {
-        vanillatoasts.create({
-          title: 'Missing a required field',
-          icon: '/images/failure.jpg',
-          timeout: 5000,
-          positionClass: 'bottomRight'
-        });
-        return;
-      }
 
       const factType = 'role';
       await axios.put('/.netlify/functions/tell', {
