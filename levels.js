@@ -215,7 +215,7 @@ const level6 = {
     { userId: 'Francesca', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client' },
     { userId: 'Finn', action: 'read', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true },
     { userId: 'Felix', action: 'delete', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
-    { userId: 'Felix', action: 'delete', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true },
+    { userId: 'Felix', action: 'delete', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true }
   ],
   par: 6,
   polarCode: dedent(`

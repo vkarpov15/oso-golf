@@ -1,6 +1,7 @@
 'use strict';
 
 const template = require('./add-role-fact.html');
+const vanillatoasts = require('vanillatoasts');
 
 const allRolesSet = new Set([
   'reader', 'admin', 'maintainer', 'editor', 'member', 'superadmin'
