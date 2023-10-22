@@ -1,7 +1,9 @@
 'use strict';
 
 const Archetype = require('archetype');
+const Player = require('../../db/player');
 const assert = require('assert');
+const connect = require('../../db/connect');
 const extrovert = require('extrovert');
 const oso = require('../../oso');
 
@@ -47,6 +49,11 @@ module.exports = extrovert.toNetlifyFunction(async params => {
     params.attribute == null || ['is_public', 'is_protected', 'has_default_role'].includes(params.attribute),
     'Invalid attribute'
   );
+  await connect();
+
+  const { sessionId } = params;
+
+  const player = await Player.findOne({ sessionId }).orFail();
 
   if (params.factType === 'role') {
     const resourceId = params.resourceType === 'Repository' ? `${params.sessionId}_${params.resourceId}` : params.resourceId;
@@ -65,6 +72,13 @@ module.exports = extrovert.toNetlifyFunction(async params => {
         { type: params.resourceType, id: resourceId }
       );
     }
+  } else if (params.attribute === 'has_default_role') {
+    player.contextFacts.push([
+      'has_default_role',
+      { type: params.resourceType, id: params.resourceId },
+      params.attributeValue
+    ]);
+    await player.save();
   } else {
     const attributeType = params.attributeValue === 'true' || params.attributeValue === 'false' ? 'Boolean' : 'String';
     await oso.tell(

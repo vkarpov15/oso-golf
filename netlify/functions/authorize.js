@@ -1,6 +1,8 @@
 'use strict';
 
 const Archetype = require('archetype');
+const Player = require('../../db/player');
+const connect = require('../../db/connect');
 const extrovert = require('extrovert');
 const oso = require('../../oso');
 
@@ -29,10 +31,17 @@ const AuthorizeParams = new Archetype({
 
 module.exports = extrovert.toNetlifyFunction(async params => {
   params = new AuthorizeParams(params);
+  const { sessionId } = params;
+
+  await connect();
+
+  const player = await Player.findOne({ sessionId }).orFail();
+
   const authorized = await oso.authorize(
     { type: 'User', id: `${params.sessionId}_${params.userId}` },
     params.action,
-    { type: params.resourceType, id: params.resourceId }
+    { type: params.resourceType, id: params.resourceId },
+    player.contextFacts
   );
   return { authorized };
 }, null, 'authorize');

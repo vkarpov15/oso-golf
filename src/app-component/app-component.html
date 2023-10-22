@@ -24,7 +24,7 @@
         </async-button>
       </div>
     </div>
-    <level @test="test" @loadFacts="loadFacts"></level>
+    <level @test="test" @loadFacts="loadFacts" :status="status"></level>
   </div>
   <div v-show="state.level >= levels.length + 1">
     <div class="text-2xl font-bold leading-9 tracking-tight">

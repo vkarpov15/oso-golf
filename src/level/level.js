@@ -52,7 +52,7 @@ has_permission(actor: Actor, "delete", repo: Repository) if
 
 module.exports = app => app.component('level', {
   inject: ['state'],
-  props: ['onTest', 'onLoadFacts'],
+  props: ['onTest', 'onLoadFacts', 'status'],
   data: () => ({
     userId: null,
     attributeFact: {

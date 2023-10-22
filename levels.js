@@ -217,7 +217,7 @@ const level6 = {
     { userId: 'Felix', action: 'delete', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
     { userId: 'Felix', action: 'delete', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true }
   ],
-  par: 6,
+  par: 5,
   polarCode: dedent(`
   actor User { }
 
@@ -257,7 +257,7 @@ const level6 = {
   organizations: ['osohq'],
   repositories: ['osohq/sample-apps', 'osohq/nodejs-client', 'osohq/configs'],
   description: dedent(`
-  Setting a repo to "protected" can prevent it from being deleted
+  A repo can only be deleted if it is not "protected"
   `)
 };
 
@@ -267,9 +267,9 @@ const level7 = {
     { userId: 'Gary', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client' },
     { userId: 'Gary', action: 'delete', resourceType: 'Repository', resourceId: 'osohq/nodejs-client', shouldFail: true },
     { userId: 'Gabriella', action: 'write', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
-    { userId: 'Gabriella', action: 'delete', resourceType: 'Repository', resourceId: 'osohq/sample-apps', shouldFail: true },
+    { userId: 'Gabriella', action: 'add_member', resourceType: 'Organization', resourceId: 'osohq', shouldFail: true },
     { userId: 'George', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client' },
-    { userId: 'George', action: 'delete', resourceType: 'Repository', resourceId: 'osohq/nodejs-client', shouldFail: true }
+    { userId: 'George', action: 'add_member', resourceType: 'Organization', resourceId: 'osohq', shouldFail: true }
   ],
   par: 5,
   polarCode: dedent(`

@@ -1,8 +1,10 @@
 'use strict';
 
 const Archetype = require('archetype');
+const connect = require('../../db/connect');
 const extrovert = require('extrovert');
 const oso = require('../../oso');
+const Player = require('../../db/player');
 
 const FactsParams = new Archetype({
   sessionId: {
@@ -17,6 +19,11 @@ const FactsParams = new Archetype({
 
 module.exports = extrovert.toNetlifyFunction(async params => {
   params = new FactsParams(params);
+
+  await connect();
+  const { sessionId } = params;
+  const player = await Player.findOne({ sessionId }).orFail();
+
   const facts = [];
   for (const userId of params.userId) {
     const factsForUser = await oso.get(
@@ -44,6 +51,8 @@ module.exports = extrovert.toNetlifyFunction(async params => {
     );
     facts.push(...factsForRepo);
   }
+
+  facts.push(...player.contextFacts);
   
   return { facts };
 }, null, 'facts');

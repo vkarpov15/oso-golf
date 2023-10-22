@@ -113,7 +113,7 @@ module.exports = app => app.component('app-component', {
           attribute: fact[0],
           resourceType: fact[1].type,
           resourceId: fact[1].id.replace(this.state.sessionId, '').replace(/^_/, ''),
-          attributeValue: fact[2].id === 'true'
+          attributeValue: typeof fact[2] === 'string' ? fact[2] : fact[2].id === 'true'
         };
       });
     }

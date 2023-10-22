@@ -32,5 +32,6 @@ module.exports = mongoose.model('Player', mongoose.Schema({
   levelsCompleted: {
     type: Number,
     default: 0
-  }
+  },
+  contextFacts: [{ type: 'Mixed' }] 
 }));
