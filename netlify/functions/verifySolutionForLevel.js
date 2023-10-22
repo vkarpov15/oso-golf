@@ -40,7 +40,8 @@ module.exports = extrovert.toNetlifyFunction(async params => {
     const authorized = await oso.authorize(
       { type: 'User', id: `${sessionId}_${constraint.userId}` },
       constraint.action,
-      { type: constraint.resourceType, id: resourceId }
+      { type: constraint.resourceType, id: resourceId },
+      player.contextFacts
     );
     if (authorized !== !constraint.shouldFail) {
       pass = false;
@@ -78,6 +79,8 @@ module.exports = extrovert.toNetlifyFunction(async params => {
     );
     facts.push(...factsForRepo);
   }
+
+  facts.push(...player.contextFacts);
 
   player.levelsCompleted = player.levelsCompleted + 1;
   player.parPerLevel[level - 1] = facts.length - parByLevel[level - 1];
