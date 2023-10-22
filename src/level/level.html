@@ -48,11 +48,18 @@
             <div class="font-bold leading-9 tracking-tight mt-3">
               Add Attribute
             </div>
-            Repository
+            <select
+              v-model="attributeFact.resourceType"
+              class="mr-1 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              <option
+                v-for="resource in allResources"
+                :value="resource"
+                v-text="resource" />
+            </select>
             <select
               v-model="attributeFact.resourceId"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              <option v-for="resource in state.repositories"
+              <option v-for="resource in resourceIds"
                 :value="resource"
                 v-text="resource" />
             </select>
@@ -69,7 +76,7 @@
             <select
               v-model="attributeFact.attributeValue"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              <option v-for="v in [true, false]" :value="v" v-text="v" />
+              <option v-for="v in [true, false, 'editor']" :value="v" v-text="v" />
             </select>
             <async-button
               @click="addAttributeFact"

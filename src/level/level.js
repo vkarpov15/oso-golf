@@ -56,6 +56,7 @@ module.exports = app => app.component('level', {
   data: () => ({
     userId: null,
     attributeFact: {
+      resourceType: null,
       resourceId: null,
       attribute: null,
       attributeValue: null
@@ -73,6 +74,12 @@ module.exports = app => app.component('level', {
         ? this.state.currentLevel.polarCode
         : defaultPolarCode;
     },
+    allResources() {
+      if (this.state.currentLevel?.repositories?.length === 0) {
+        return ['Organization'];
+      }
+      return ['Organization', 'Repository'];
+    },
     allUsers() {
       return [...new Set(this.state.constraints.map(c => c.userId))];
     },
@@ -88,13 +95,13 @@ module.exports = app => app.component('level', {
       ];
     },
     allAttributes() {
-      return ['is_public', 'is_protected'];
+      return ['is_public', 'is_protected', 'has_default_role'];
     },
     resourceIds() {
-      if (this.roleFact.resourceType === 'Organization') {
+      if (this.attributeFact.resourceType === 'Organization') {
         return this.state.organizations;
       }
-      if (this.roleFact.resourceType === 'Repository') {
+      if (this.attributeFact.resourceType === 'Repository') {
         return this.state.repositories;
       }
 
@@ -146,7 +153,7 @@ module.exports = app => app.component('level', {
     },
     async addAttributeFact() {
       const { attributeFact } = this;
-      if (!attributeFact.resourceId || !attributeFact.attribute || attributeFact.attributeValue == null) {
+      if (!attributeFact.resourceType || !attributeFact.resourceId || !attributeFact.attribute || attributeFact.attributeValue == null) {
         vanillatoasts.create({
           title: 'Missing a required field',
           icon: '/images/failure.jpg',
@@ -156,7 +163,7 @@ module.exports = app => app.component('level', {
         return;
       }
 
-      const resourceType = 'Repository';
+      const resourceType = attributeFact.resourceType;
       const factType = 'attribute';
       await axios.put('/.netlify/functions/tell', {
         sessionId: this.state.sessionId,

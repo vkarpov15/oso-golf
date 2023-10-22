@@ -36,7 +36,7 @@ const TellParams = new Archetype({
     $validate: (v, type, doc) => assert.ok(v != null || doc.factType !== 'attribute')
   },
   attributeValue: {
-    $type: 'boolean',
+    $type: 'string',
     $validate: (v, type, doc) => assert.ok(v != null || doc.factType !== 'attribute')
   }
 }).compile('TellParams');
@@ -44,7 +44,7 @@ const TellParams = new Archetype({
 module.exports = extrovert.toNetlifyFunction(async params => {
   params = new TellParams(params);
   assert.ok(
-    params.attribute == null || ['is_public', 'is_protected'].includes(params.attribute),
+    params.attribute == null || ['is_public', 'is_protected', 'has_default_role'].includes(params.attribute),
     'Invalid attribute'
   );
 
@@ -66,10 +66,11 @@ module.exports = extrovert.toNetlifyFunction(async params => {
       );
     }
   } else {
+    const attributeType = params.attributeValue === 'true' || params.attributeValue === 'false' ? 'Boolean' : 'String';
     await oso.tell(
       params.attribute,
-      { type: 'Repository', id: `${params.sessionId}_${params.resourceId}` },
-      { type: 'Boolean', id: !!params.attributeValue + '' }
+      { type: params.resourceType, id: `${params.sessionId}_${params.resourceId}` },
+      { type: attributeType, id: params.attributeValue }
     );
   }
 
