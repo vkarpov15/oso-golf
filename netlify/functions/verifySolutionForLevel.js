@@ -34,13 +34,10 @@ module.exports = extrovert.toNetlifyFunction(async params => {
   const constraints = constraintsByLevel[level - 1];
   let pass = true;
   for (const constraint of constraints) {
-    const resourceId = constraint.resourceType === 'Repository' ?
-      `${params.sessionId}_${constraint.resourceId}` :
-      constraint.resourceId;
     const authorized = await oso.authorize(
-      { type: 'User', id: `${sessionId}_${constraint.userId}` },
+      { type: 'User', id: constraint.userId },
       constraint.action,
-      { type: constraint.resourceType, id: resourceId },
+      { type: constraint.resourceType, id: constraint.resourceId },
       player.contextFacts
     );
     if (authorized !== !constraint.shouldFail) {
@@ -51,39 +48,8 @@ module.exports = extrovert.toNetlifyFunction(async params => {
     throw new Error('Did not pass');
   }
 
-  const userIds = new Set(constraints.map(constraint => constraint.userId));
-  const facts = [];
-  for (const userId of userIds) {
-    const factsForUser = await oso.get(
-      'has_role',
-      { type: 'User', id: `${sessionId}_${userId}` },
-      null,
-      null
-    );
-    facts.push(...factsForUser);
-  }
-  for (const repo of ['osohq/sample-apps', 'osohq/nodejs-client', 'osohq/configs']) {
-    let factsForRepo = await oso.get(
-      'is_protected',
-      { type: 'Repository', id: `${params.sessionId}_${repo}` },
-      null,
-      null
-    );
-    facts.push(...factsForRepo);
-
-    factsForRepo = await oso.get(
-      'is_public',
-      { type: 'Repository', id: `${params.sessionId}_${repo}` },
-      null,
-      null
-    );
-    facts.push(...factsForRepo);
-  }
-
-  facts.push(...player.contextFacts);
-
   player.levelsCompleted = player.levelsCompleted + 1;
-  player.parPerLevel[level - 1] = facts.length - parByLevel[level - 1];
+  player.parPerLevel[level - 1] = player.contextFacts.length - parByLevel[level - 1];
   player.par = player.parPerLevel.reduce((sum, v) => sum + v);
   player.gameplayTimeMS = Date.now() - player.startTime.valueOf();
   await player.save();

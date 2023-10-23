@@ -37,8 +37,10 @@ module.exports = extrovert.toNetlifyFunction(async params => {
 
   const player = await Player.findOne({ sessionId }).orFail();
 
+  console.log('Authorize', params, player.contextFacts);
+
   const authorized = await oso.authorize(
-    { type: 'User', id: `${params.sessionId}_${params.userId}` },
+    { type: 'User', id: params.userId },
     params.action,
     { type: params.resourceType, id: params.resourceId },
     player.contextFacts

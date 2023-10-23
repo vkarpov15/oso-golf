@@ -51,21 +51,25 @@ module.exports = extrovert.toNetlifyFunction(async params => {
   const { sessionId } = params;
   const player = await Player.findOne({ sessionId }).orFail();
 
+  console.log('Del', params, player.contextFacts);
+
   if (params.factType === 'role') {
-    const resourceId = params.resourceType === 'Repository' ? `${params.sessionId}_${params.resourceId}` : params.resourceId;
     if (params.role === 'superadmin') {
-      await oso.delete(
-        'has_role',
-        { type: 'User', id: `${params.sessionId}_${params.userId}` },
-        params.role
-      );
+      player.contextFacts = player.contextFacts.filter(fact => {
+        return fact[0] !== 'has_role' ||
+          fact[1].type !== 'User' ||
+          fact[1].id !== params.userId ||
+          fact[2] !== params.role;
+      });
     } else {
-      await oso.delete(
-        'has_role',
-        { type: 'User', id: `${params.sessionId}_${params.userId}` },
-        params.role,
-        { type: params.resourceType, id: resourceId }
-      );
+      player.contextFacts = player.contextFacts.filter(fact => {
+        return fact[0] !== 'has_role' ||
+          fact[1].type !== 'User' ||
+          fact[1].id !== params.userId ||
+          fact[2] !== params.role ||
+          fact[3]?.type !== params.resourceType ||
+          fact[3]?.id !== params.resourceId;
+      });
     }
     
   } else if (params.attribute === 'has_default_role') {
@@ -75,14 +79,14 @@ module.exports = extrovert.toNetlifyFunction(async params => {
         fact[1].id !== params.resourceId ||
         fact[2] !== params.attributeValue;
     });
-    await player.save();
   } else {
     player.contextFacts = player.contextFacts.filter(fact => {
       return fact[0] !== params.attribute ||
         fact[1].type !== 'Repository' ||
-        fact[1].id !== `${params.sessionId}_${params.resourceId}` ||
+        fact[1].id !== params.resourceId ||
         fact[2] !== params.attributeValue;
     });
   }
+  await player.save();
   return { ok: true };
 }, null, 'deleteFact');

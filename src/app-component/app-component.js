@@ -50,16 +50,13 @@ module.exports = app => app.component('app-component', {
       this.state.showNextLevelButton = null;
       let passed = true;
       for (const constraint of this.state.constraints) {
-        const resourceId = constraint.resourceType === 'Repository' ?
-          `${this.state.sessionId}_${constraint.resourceId}` :
-          constraint.resourceId;
         const authorized = await axios.get('/.netlify/functions/authorize', {
           params: {
             sessionId: this.state.sessionId,
             userId: constraint.userId,
             action: constraint.action,
             resourceType: constraint.resourceType,
-            resourceId
+            resourceId: constraint.resourceId
           }
         }).then(res => res.data.authorized);
         const pass = authorized === !constraint.shouldFail;

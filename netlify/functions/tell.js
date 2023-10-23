@@ -56,21 +56,19 @@ module.exports = extrovert.toNetlifyFunction(async params => {
   const player = await Player.findOne({ sessionId }).orFail();
 
   if (params.factType === 'role') {
-    const resourceId = params.resourceType === 'Repository' ? `${params.sessionId}_${params.resourceId}` : params.resourceId;
-    
     if (params.role === 'superadmin') {
-      await oso.tell(
+      player.contextFacts.push([
         'has_role',
-        { type: 'User', id: `${params.sessionId}_${params.userId}` },
+        { type: 'User', id: params.userId },
         params.role
-      );
+      ]);
     } else {
-      await oso.tell(
+      player.contextFacts.push([
         'has_role',
-        { type: 'User', id: `${params.sessionId}_${params.userId}` },
+        { type: 'User', id: params.userId },
         params.role,
-        { type: params.resourceType, id: resourceId }
-      );
+        { type: params.resourceType, id: params.resourceId }
+      ]);
     }
   } else if (params.attribute === 'has_default_role') {
     player.contextFacts.push([
@@ -78,15 +76,15 @@ module.exports = extrovert.toNetlifyFunction(async params => {
       { type: params.resourceType, id: params.resourceId },
       params.attributeValue
     ]);
-    await player.save();
   } else {
     player.contextFacts.push([
       params.attribute,
-      { type: params.resourceType, id: `${params.sessionId}_${params.resourceId}` },
+      { type: params.resourceType, id: params.resourceId },
       { type: 'Boolean', id: params.attributeValue }
     ]);
-    await player.save();
   }
+
+  await player.save();
 
   return { ok: true };
 }, null, 'tell');
