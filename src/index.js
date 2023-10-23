@@ -22,7 +22,7 @@ const app = Vue.createApp({
   setup() {
     const state = Vue.reactive({
       organizations: ['osohq', 'acme'],
-      repositories: ['osohq/sample-apps', 'osohq/configs', 'osohq/nodejs-client'],
+      repositories: ['osohq/sample-apps', 'osohq/configs', 'osohq/nodejs-client', 'acme/website'],
       constraints: levels[0].constraints,
       results: [],
       facts: [],
