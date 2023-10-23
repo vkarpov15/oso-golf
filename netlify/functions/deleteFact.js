@@ -48,6 +48,9 @@ module.exports = extrovert.toNetlifyFunction(async params => {
 
   await connect();
 
+  const { sessionId } = params;
+  const player = await Player.findOne({ sessionId }).orFail();
+
   if (params.factType === 'role') {
     const resourceId = params.resourceType === 'Repository' ? `${params.sessionId}_${params.resourceId}` : params.resourceId;
     if (params.role === 'superadmin') {
@@ -66,9 +69,6 @@ module.exports = extrovert.toNetlifyFunction(async params => {
     }
     
   } else if (params.attribute === 'has_default_role') {
-    const { sessionId } = params;
-    const player = await Player.findOne({ sessionId }).orFail();
-
     player.contextFacts = player.contextFacts.filter(fact => {
       return fact[0] !== 'has_default_role' ||
         fact[1].type !== params.resourceType ||
@@ -77,11 +77,12 @@ module.exports = extrovert.toNetlifyFunction(async params => {
     });
     await player.save();
   } else {
-    await oso.delete(
-      params.attribute,
-      { type: 'Repository', id: `${params.sessionId}_${params.resourceId}` },
-      { type: 'Boolean', id: params.attributeValue }
-    );
+    player.contextFacts = player.contextFacts.filter(fact => {
+      return fact[0] !== params.attribute ||
+        fact[1].type !== 'Repository' ||
+        fact[1].id !== `${params.sessionId}_${params.resourceId}` ||
+        fact[2] !== params.attributeValue;
+    });
   }
   return { ok: true };
 }, null, 'deleteFact');

@@ -80,12 +80,12 @@ module.exports = extrovert.toNetlifyFunction(async params => {
     ]);
     await player.save();
   } else {
-    const attributeType = params.attributeValue === 'true' || params.attributeValue === 'false' ? 'Boolean' : 'String';
-    await oso.tell(
+    player.contextFacts.push([
       params.attribute,
       { type: params.resourceType, id: `${params.sessionId}_${params.resourceId}` },
-      { type: attributeType, id: params.attributeValue }
-    );
+      { type: 'Boolean', id: params.attributeValue }
+    ]);
+    await player.save();
   }
 
   return { ok: true };
