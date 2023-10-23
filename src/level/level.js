@@ -95,7 +95,24 @@ module.exports = app => app.component('level', {
       ];
     },
     allAttributes() {
-      return ['is_public', 'is_protected', 'has_default_role'];
+      if (this.attributeFact.resourceType === 'Organization') {
+        return ['has_default_role'];
+      }
+      if (this.attributeFact.resourceType === 'Repository') {
+        return ['is_public', 'is_protected'];
+      }
+
+      return [];
+    },
+    allAttributeValues() {
+      if (this.attributeFact.resourceType === 'Organization') {
+        return ['reader', 'admin', 'maintainer', 'editor'];
+      }
+      if (this.attributeFact.resourceType === 'Repository') {
+        return ['true', 'false'];
+      }
+
+      return [];
     },
     resourceIds() {
       if (this.attributeFact.resourceType === 'Organization') {

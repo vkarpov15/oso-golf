@@ -84,7 +84,7 @@ module.exports = extrovert.toNetlifyFunction(async params => {
       return fact[0] !== params.attribute ||
         fact[1].type !== 'Repository' ||
         fact[1].id !== params.resourceId ||
-        fact[2] !== params.attributeValue;
+        fact[2].id !== params.attributeValue;
     });
   }
   await player.save();
