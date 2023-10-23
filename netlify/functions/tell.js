@@ -17,6 +17,11 @@ const TellParams = new Archetype({
     $required: true,
     $enum: ['role', 'attribute']
   },
+  actorType: {
+    $type: 'string',
+    $required: true,
+    $default: 'User'
+  },
   userId: {
     $type: 'string',
     $validate: (v, type, doc) => assert.ok(v != null || doc.factType !== 'role')
@@ -45,10 +50,6 @@ const TellParams = new Archetype({
 
 module.exports = extrovert.toNetlifyFunction(async params => {
   params = new TellParams(params);
-  assert.ok(
-    params.attribute == null || ['is_public', 'is_protected', 'has_default_role'].includes(params.attribute),
-    'Invalid attribute'
-  );
   await connect();
 
   const { sessionId } = params;
@@ -59,22 +60,28 @@ module.exports = extrovert.toNetlifyFunction(async params => {
     if (params.role === 'superadmin') {
       player.contextFacts.push([
         'has_role',
-        { type: 'User', id: params.userId },
+        { type: params.actorType, id: params.userId },
         params.role
       ]);
     } else {
       player.contextFacts.push([
         'has_role',
-        { type: 'User', id: params.userId },
+        { type: params.actorType, id: params.userId },
         params.role,
         { type: params.resourceType, id: params.resourceId }
       ]);
     }
   } else if (params.attribute === 'has_default_role') {
     player.contextFacts.push([
-      'has_default_role',
+      params.attribute,
       { type: params.resourceType, id: params.resourceId },
       params.attributeValue
+    ]);
+  } else if (params.attribute === 'has_group') {
+    player.contextFacts.push([
+      params.attribute,
+      { type: params.resourceType, id: params.resourceId },
+      { type: 'Group', id: params.attributeValue }
     ]);
   } else {
     player.contextFacts.push([

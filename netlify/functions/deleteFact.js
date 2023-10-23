@@ -5,7 +5,6 @@ const Player = require('../../db/player');
 const assert = require('assert');
 const connect = require('../../db/connect');
 const extrovert = require('extrovert');
-const oso = require('../../oso');
 
 const DeleteFactParams = new Archetype({
   sessionId: {

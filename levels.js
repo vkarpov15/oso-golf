@@ -321,4 +321,165 @@ const level7 = {
   `)
 };
 
-module.exports = [level1, level2, level3, level4, level5, level6, level7];
+const level8 = {
+  constraints: [
+    { userId: 'Henry', action: 'write', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
+    { userId: 'Henry', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client' },
+    { userId: 'Henry', action: 'write', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true },
+    { userId: 'Heather', action: 'write', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
+    { userId: 'Heather', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client' },
+    { userId: 'Heather', action: 'write', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true },
+    { userId: 'Holly', action: 'write', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
+    { userId: 'Holly', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client' },
+    { userId: 'Holly', action: 'write', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true },
+  ],
+  par: 6,
+  polarCode: dedent(`
+  actor User { }
+
+  # A group is a kind of actor
+  actor Group { }
+
+  resource Organization { 
+      roles = ["admin", "member"];
+  }
+
+  resource Repository { 
+    permissions = [
+        "read", "write", "delete"
+    ];
+    roles = ["reader", "admin", "editor"];
+    relations = { organization: Organization };
+
+    "reader" if "member" on "organization";
+    "admin" if "admin" on "organization";
+    "reader" if "editor";
+    "editor" if "admin";
+
+    # reader permissions
+    "read" if "reader";
+
+    # editor permissions
+    "write" if "editor";
+  }
+
+  has_permission(_: Actor, "read", repo: Repository) if
+    is_public(repo, true);
+
+  has_role(user: User, role: String, resource: Resource) if
+    group matches Group and
+    has_group(user, group) and
+    has_role(group, role, resource);
+  `),
+  showAddRoleFact: true,
+  showAddAttributeFact: true,
+  allowedRoles: ['admin', 'member', 'reader', 'editor'],
+  organizations: ['osohq'],
+  groups: ['superstars'],
+  repositories: ['osohq/sample-apps', 'osohq/nodejs-client', 'osohq/configs'],
+  description: dedent(`
+  Users can also belong to groups, which can have multiple roles. Group membership is just an attribute  Add some users and roles to the "superstars" group to complete this hole. "has_group" is just an attribute on users.
+  `)
+};
+
+const level9 = {
+  constraints: [
+    { userId: 'Isabel', action: 'write', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
+    { userId: 'Isabel', action: 'read', resourceType: 'Repository', resourceId: 'acme/website' },
+    { userId: 'Isabel', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client', shouldFail: true },
+    { userId: 'Ian', action: 'write', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
+    { userId: 'Ian', action: 'read', resourceType: 'Repository', resourceId: 'acme/website' },
+    { userId: 'Ian', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client', shouldFail: true },
+    { userId: 'Ingrid', action: 'write', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
+    { userId: 'Ingrid', action: 'read', resourceType: 'Repository', resourceId: 'acme/website' },
+    { userId: 'Ingrid', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client', shouldFail: true },
+    { userId: 'Idris', action: 'read', resourceType: 'Repository', resourceId: 'acme/website', shouldFail: true },
+    { userId: 'Idris', action: 'write', resourceType: 'Repository', resourceId: 'osohq/sample-apps' }
+  ],
+  par: 8,
+  polarCode: dedent(`
+  actor User { }
+
+  # A group is a kind of actor
+  actor Group { }
+
+  global {
+    roles = ["superadmin"];
+  }
+
+  resource Organization { 
+      roles = ["admin", "member"];
+      permissions = ["read", "add_member"];
+
+      # role hierarchy:
+      # admins inherit all member permissions
+      "member" if "admin";
+
+      "admin" if global "superadmin";
+
+      # org-level permissions
+      "read" if "member";
+      "add_member" if "admin";
+  }
+
+  resource Repository { 
+      permissions = [
+          "read", "write", "delete"
+      ];
+      roles = ["reader", "admin", "maintainer", "editor"];
+      relations = { organization: Organization };
+
+      "reader" if "member" on "organization";
+      "admin" if "admin" on "organization";
+      "reader" if "editor";
+      "editor" if "maintainer";
+      "maintainer" if "admin";
+
+      # reader permissions
+      "read" if "reader";
+
+      # editor permissions
+      "write" if "editor";
+  }
+
+  has_permission(_: Actor, "read", repo: Repository) if
+      is_public(repo, true);
+
+
+  has_permission(actor: Actor, "delete", repo: Repository) if
+      has_role(actor, "admin", repo) and
+      is_protected(repo, false);
+
+  has_role(actor: Actor, role: String, repo: Repository) if
+    org matches Organization and
+    has_relation(repo, "organization", org) and
+    has_default_role(org, role) and
+    has_role(actor, "member", org);
+
+  has_role(user: User, role: String, resource: Resource) if
+    group matches Group and
+    has_group(user, group) and
+    has_role(group, role, resource);
+  `),
+  showAddRoleFact: true,
+  showAddAttributeFact: true,
+  allowedRoles: ['admin', 'member', 'reader', 'editor'],
+  organizations: ['osohq', 'acme'],
+  groups: ['superstars'],
+  repositories: ['osohq/sample-apps', 'osohq/nodejs-client', 'osohq/configs', 'acme/website'],
+  description: dedent(`
+  Tie it all together to solve this tricky one :)
+  `)
+};
+
+module.exports = [
+  level1,
+  level2,
+  level3,
+  level4,
+  level5,
+  level6,
+  level7,
+  level8,
+  level9
+];

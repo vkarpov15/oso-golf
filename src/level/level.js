@@ -1,7 +1,8 @@
 'use strict';
 
 const axios = require('axios');
-const levels = require('../../levels');
+const runTests = require('../_methods/runTests');
+const setLevel = require('../_methods/setLevel');
 const template = require('./level.html');
 const vanillatoasts = require('vanillatoasts');
 
@@ -52,7 +53,7 @@ has_permission(actor: Actor, "delete", repo: Repository) if
 
 module.exports = app => app.component('level', {
   inject: ['state'],
-  props: ['onTest', 'onLoadFacts', 'status'],
+  props: ['status'],
   data: () => ({
     userId: null,
     attributeFact: {
@@ -75,10 +76,14 @@ module.exports = app => app.component('level', {
         : defaultPolarCode;
     },
     allResources() {
+      let ret = ['Organization', 'Repository', 'User'];
       if (this.state.currentLevel?.repositories?.length === 0) {
-        return ['Organization'];
+        ret = ret.filter(type => type !== 'Organization');
       }
-      return ['Organization', 'Repository'];
+      if (!this.state.currentLevel?.groups) {
+        ret = ret.filter(type => type !== 'User');
+      }
+      return ret;
     },
     allUsers() {
       return [...new Set(this.state.constraints.map(c => c.userId))];
@@ -101,6 +106,9 @@ module.exports = app => app.component('level', {
       if (this.attributeFact.resourceType === 'Repository') {
         return ['is_public', 'is_protected'];
       }
+      if (this.attributeFact.resourceType === 'User') {
+        return ['has_group'];
+      }
 
       return [];
     },
@@ -111,6 +119,9 @@ module.exports = app => app.component('level', {
       if (this.attributeFact.resourceType === 'Repository') {
         return ['true', 'false'];
       }
+      if (this.attributeFact.resourceType === 'User') {
+        return this.state.currentLevel?.groups ?? [];
+      }
 
       return [];
     },
@@ -120,6 +131,9 @@ module.exports = app => app.component('level', {
       }
       if (this.attributeFact.resourceType === 'Repository') {
         return this.state.repositories;
+      }
+      if (this.attributeFact.resourceType === 'User') {
+        return [...new Set(this.state.constraints.map(c => c.userId))];
       }
 
       return [];
@@ -148,26 +162,6 @@ module.exports = app => app.component('level', {
     }
   },
   methods: {
-    async addRoleFact(propsToReset, updates) {
-      const { roleFact, userId } = updates;
-
-      const factType = 'role';
-      await axios.put('/.netlify/functions/tell', {
-        sessionId: this.state.sessionId,
-        factType,
-        userId: userId,
-        role: roleFact.role,
-        resourceType: roleFact.resourceType,
-        resourceId: roleFact.resourceId
-      }).then(res => res.data);
-      this.state.facts.push({
-        factType,
-        userId: userId,
-        ...roleFact
-      });
-
-      await this.onTest();
-    },
     async addAttributeFact() {
       const { attributeFact } = this;
       if (!attributeFact.resourceType || !attributeFact.resourceId || !attributeFact.attribute || attributeFact.attributeValue == null) {
@@ -203,13 +197,19 @@ module.exports = app => app.component('level', {
       
       this.userId = null;
 
-      await this.onTest();
+      await runTests(this.state);
     },
     displayRoleFact(fact) {
       if (fact.role === 'superadmin') {
-        return `User ${fact.userId} has role ${fact.role}`;
+        return `${fact.actorType || 'User'} ${fact.userId} has role ${fact.role}`;
       }
-      return `User ${fact.userId} has role ${fact.role} on ${fact.resourceType} ${fact.resourceId}`;
+      return `${fact.actorType || 'User'} ${fact.userId} has role ${fact.role} on ${fact.resourceType} ${fact.resourceId}`;
+    },
+    displayAttributeFact(fact) {
+      if (fact.attribute === 'has_group') {
+        return `User ${fact.resourceId} belongs to Group ${fact.attributeValue}`;
+      }
+      return `Repository ${fact.resourceId} has attribute ${fact.attribute} set to ${fact.attributeValue}`;
     },
     async deleteFact(fact) {
       await axios.put('/.netlify/functions/deleteFact', {
@@ -217,7 +217,7 @@ module.exports = app => app.component('level', {
         ...fact
       }).then(res => res.data);
       this.state.facts = this.state.facts.filter(f => fact !== f);
-      await this.onTest();
+      await runTests(this.state);
     },
     displayImageForTestResult(index) {
       if (!this.state.results[index]) {
@@ -230,21 +230,9 @@ module.exports = app => app.component('level', {
         sessionId: this.state.sessionId,
         level: this.state.level
       }).then(res => res.data);
-      this.state.level = player.levelsCompleted + 1;
-      this.state.par = player.par;
-      this.state.results = [];
-      this.state.showNextLevelButton = false;
-      const facts = [...this.state.facts];
-      this.state.facts = [];
-
-      await Promise.all(facts.map(fact => this.deleteFact(fact)));
       
-      if (this.state.level < levels.length + 1) {
-        this.state.currentLevel = levels[this.state.level - 1];
-        this.state.constraints = this.state.currentLevel.constraints;
-        await this.onLoadFacts();
-        await this.onTest();
-      }
+      await setLevel(player.levelsCompleted + 1, false, this.state);
+      await runTests(this.state);
     }
   },
   mounted() {

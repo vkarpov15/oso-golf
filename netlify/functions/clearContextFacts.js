@@ -1,31 +1,27 @@
 'use strict';
 
 const Archetype = require('archetype');
+const Player = require('../../db/player');
 const connect = require('../../db/connect');
 const extrovert = require('extrovert');
-const oso = require('../../oso');
-const Player = require('../../db/player');
 
-const FactsParams = new Archetype({
+const ClearContextFactsParams = new Archetype({
   sessionId: {
     $type: 'string',
     $required: true
-  },
-  userId: {
-    $type: ['string'],
-    $required: true
   }
-}).compile('FactsParams');
+}).compile('ClearContextFactsParams');
 
 module.exports = extrovert.toNetlifyFunction(async params => {
-  params = new FactsParams(params);
+  params = new ClearContextFactsParams(params);
 
   await connect();
+
   const { sessionId } = params;
   const player = await Player.findOne({ sessionId }).orFail();
 
-  const facts = [];
-  facts.push(...player.contextFacts);
-  
-  return { facts };
-}, null, 'facts');
+  player.contextFacts = [];
+
+  await player.save();
+  return { ok: true };
+}, null, 'clearContextFacts');

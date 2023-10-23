@@ -2,6 +2,8 @@
 
 const axios = require('axios');
 const levels = require('../../levels');
+const runTests = require('../_methods/runTests');
+const setLevel = require('../_methods/setLevel');
 const template = require('./app-component.html');
 
 module.exports = app => app.component('app-component', {
@@ -46,26 +48,7 @@ module.exports = app => app.component('app-component', {
   },
   methods: {
     async test() {
-      this.state.results = [];
-      this.state.showNextLevelButton = null;
-      let passed = true;
-      for (const constraint of this.state.constraints) {
-        const authorized = await axios.get('/.netlify/functions/authorize', {
-          params: {
-            sessionId: this.state.sessionId,
-            userId: constraint.userId,
-            action: constraint.action,
-            resourceType: constraint.resourceType,
-            resourceId: constraint.resourceId
-          }
-        }).then(res => res.data.authorized);
-        const pass = authorized === !constraint.shouldFail;
-        this.state.results.push({ ...constraint, pass });
-        if (!pass) {
-          passed = false;
-        }
-      }
-      this.state.showNextLevelButton = passed;
+      await runTests(this.state);
     },
     async verifySolutionForLevel() {
       const { player } = await axios.post('/.netlify/functions/verifySolutionForLevel', {
@@ -76,10 +59,9 @@ module.exports = app => app.component('app-component', {
       this.state.par = player.par;
       this.state.results = [];
       this.state.showNextLevelButton = false;
-      const facts = [...this.state.facts];
       this.state.facts = [];
 
-      await Promise.all(facts.map(fact => this.deleteFact(fact)));
+      setLevel(player.levelsCompleted + 1, false, this.state);
       
       if (this.state.level < levels.length + 1) {
         this.state.currentLevel = levels[this.state.level - 1];
@@ -92,24 +74,31 @@ module.exports = app => app.component('app-component', {
       window.localStorage.setItem('_gitclubGameSession', '');
       window.location.reload();
     },
-    async loadFacts() {
-      const facts = await axios.put('/.netlify/functions/facts', {
-        sessionId: this.state.sessionId,
-        userId: [...new Set(this.state.constraints.map(c => c.userId))]
-      }).then(res => res.data.facts);
-      
-      this.state.facts = facts.map(fact => {
-        return fact[0] === 'has_role' ? {
-          factType: 'role',
-          userId: fact[1].id.replace(this.state.sessionId, '').replace(/^_/, ''),
-          role: fact[2],
-          resourceType: fact[3]?.type,
-          resourceId: fact[3]?.id?.replace(this.state.sessionId, '')?.replace(/^_/, '')
-        } : {
+    loadFacts(player) {      
+      this.state.facts = player.contextFacts.map(fact => {
+        if (fact[0] === 'has_role') {
+          return {
+            factType: 'role',
+            actorType: fact[1].type,
+            userId: fact[1].id,
+            role: fact[2],
+            resourceType: fact[3]?.type,
+            resourceId: fact[3]?.id
+          };
+        } else if (fact[0] === 'has_group') {
+          return {
+            factType: 'attribute',
+            attribute: fact[0],
+            resourceType: fact[1].type,
+            resourceId: fact[1].id,
+            attributeValue: fact[2].id
+          };
+        }
+        return {
           factType: 'attribute',
           attribute: fact[0],
           resourceType: fact[1].type,
-          resourceId: fact[1].id.replace(this.state.sessionId, '').replace(/^_/, ''),
+          resourceId: fact[1].id,
           attributeValue: typeof fact[2] === 'string' ? fact[2] : fact[2].id === 'true'
         };
       });
@@ -128,15 +117,11 @@ module.exports = app => app.component('app-component', {
     if (player == null) {
       return;
     }
-    this.state.level = player.levelsCompleted + 1;
-    if (this.state.level < levels.length + 1) {
-      this.state.currentLevel = levels[this.state.level - 1];
-      this.state.constraints = this.state.currentLevel.constraints;
-      await this.loadFacts();
-      await this.test();
-    }
+    await setLevel(player.levelsCompleted + 1, true, this.state);
     this.state.par = player.par;
     this.state.startTime = new Date(player.startTime);
+    this.loadFacts(player);
     this.status = 'loaded';
+    await this.test();
   }
 });

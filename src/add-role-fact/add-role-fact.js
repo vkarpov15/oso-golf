@@ -1,5 +1,7 @@
 'use strict';
 
+const axios = require('axios');
+const runTests = require('../_methods/runTests');
 const template = require('./add-role-fact.html');
 const vanillatoasts = require('vanillatoasts');
 
@@ -9,14 +11,21 @@ const allRolesSet = new Set([
 
 module.exports = app => app.component('add-role-fact', {
   inject: ['state'],
+  props: ['actorType'],
   data: () => ({ userId: '', role: '', resourceType: '', resourceId: '' }),
   template,
   computed: {
     allUsers() {
+      if (this.actorType === 'Group') {
+        return this.state.currentLevel?.groups;
+      }
       return [...new Set(this.state.constraints.map(c => c.userId))];
     },
     isGlobalRole() {
       return this.role === 'superadmin';
+    },
+    displayActorType() {
+      return this.actorType || 'User';
     },
     allRoles() {
       const allowedRoles = this.state.currentLevel?.allowedRoles
@@ -61,14 +70,31 @@ module.exports = app => app.component('add-role-fact', {
         return;
       }
 
-      await this.$attrs.onAddRoleFact({
-        roleFact: { role: this.role, resourceType: this.resourceType, resourceId: this.resourceId },
-        userId: this.userId
+      const factType = 'role';
+      await axios.put('/.netlify/functions/tell', {
+        sessionId: this.state.sessionId,
+        factType,
+        actorType: this.actorType,
+        userId: this.userId,
+        role: this.role,
+        resourceType: this.resourceType,
+        resourceId: this.resourceId
+      }).then(res => res.data);
+      this.state.facts.push({
+        factType,
+        actorType: this.actorType,
+        userId: this.userId,
+        role: this.role,
+        resourceType: this.resourceType,
+        resourceId: this.resourceId
       });
+
       this.userId = '';
       this.role = '';
       this.resourceType = '';
       this.resourceId = '';
+
+      await runTests(this.state);
     }
   }
 });

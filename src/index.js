@@ -8,6 +8,9 @@ const components = require('./components');
 const levels = require('../levels');
 const vanillatoasts = require('vanillatoasts');
 
+window.setLevel = require('./_methods/setLevel');
+window.runTests = require('./_methods/runTests');
+
 const app = Vue.createApp({
   template: `
   <div>
