@@ -71,9 +71,11 @@ module.exports = app => app.component('level', {
   template,
   computed: {
     polarCode() {
-      return this.state.currentLevel?.polarCode
+      const code = this.state.currentLevel?.polarCode
         ? this.state.currentLevel.polarCode
         : defaultPolarCode;
+
+      return Prism.highlight(code, Prism.languages.ruby);
     },
     allResources() {
       let ret = ['Organization', 'Repository', 'User'];
@@ -234,8 +236,5 @@ module.exports = app => app.component('level', {
       await setLevel(player.levelsCompleted + 1, false, this.state);
       await runTests(this.state);
     }
-  },
-  mounted() {
-    Prism.highlightElement(this.$refs.codeSnippet);
   }
 });
