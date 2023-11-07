@@ -1,52 +1,87 @@
-<div>
-  <div>
-    <label for="name" class="block text-sm font-medium leading-6 text-gray-900">
-      Your Name
-    </label>
-    <div class="mt-2">
-      <input
-        type="name"
-        name="name"
-        v-model="name"
-        class="block w-full rounded-md border-0 py-1.5 pl-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-        placeholder="John Smith">
+<div class="m-auto max-w-5xl mt-5">
+  <div class="text-4xl font-bold tracking-tight sm:text-6xl mb-0.5 flex gap-2 mb-5">
+    <div>
+      <img class="h-[1em]" src="https://ui.osohq.com/logo-bear-black.png">
     </div>
-    <p
-      class="mt-2 text-sm text-red-600"
-      v-if="errors.name">
-      {{state.errors.name}}
-    </p>
-  </div>
-  <div class="mt-3">
-    <label
-      for="email"
-      class="block text-sm font-medium leading-6 text-gray-900">
-      Email
-    </label>
-    <div class="mt-2">
-      <input
-        type="email"
-        name="email"
-        v-model="email"
-        class="block w-full rounded-md border-0 py-1.5 pl-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-        placeholder="you@example.com">
+    <div>
+      Oso Golf
     </div>
-    <p
-      class="mt-2 text-sm text-red-600"
-      v-if="errors.email">
-      {{errors.email}}
-    </p>
   </div>
-  <async-button
-    class="rounded-md bg-green-600 px-3.5 py-2.5 mt-6 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
-    @click="startGame()">
-    Start Game
-  </async-button>
-  <div class="mt-3">
-    <async-button
-      class="rounded-md bg-yellow-600 px-3.5 py-2.5 mt-6 text-sm font-semibold text-white shadow-sm hover:bg-yellow-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-600"
-      @click="$router.push('/leaderboard')">
-      View Leaderboard
-    </async-button>
+  <div class="flex flex-col md:flex-row gap-10">
+    <div class="w-full md:w-[50%]">
+      <img src="/images/oso-golf-bear.png" class="w-full" />
+    </div>
+    <div class="w-full md:w-[50%]">
+      <p>
+        Welcome to the Oso Golf Tournament. ⛳️
+        This is a 1-day event where we challenge the greatest minds to complete 9 holes of Oso Golf.
+        Oso Golf is a logic game, similar to “Regex Golf”, that is designed to teach you authorization principles by completing permissions with as few objects as possible. 
+      </p>
+      <p class="mt-1">
+        🏆 Each person who completes the challenge will receive a limited-edition sticker pack.
+        We will award winners based on two criteria 1) Time to solve 2) Par (the number of facts you add to a particular challenge).
+      </p>
+
+      <div class="mt-3">
+        <label for="name" class="block text-sm font-medium leading-6 text-gray-900">
+          Your Name
+        </label>
+        <div class="mt-2">
+          <input
+            type="name"
+            name="name"
+            v-model="name"
+            class="block w-full rounded-md border-0 py-1.5 pl-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            placeholder="John Smith">
+        </div>
+        <p
+          class="mt-2 text-sm text-red-600"
+          v-if="errors.name">
+          {{state.errors.name}}
+        </p>
+      </div>
+      <div class="mt-3">
+        <label
+          for="email"
+          class="block text-sm font-medium leading-6 text-gray-900">
+          Email
+        </label>
+        <div class="mt-2">
+          <input
+            type="email"
+            name="email"
+            v-model="email"
+            class="block w-full rounded-md border-0 py-1.5 pl-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            placeholder="you@example.com">
+        </div>
+        <p
+          class="mt-2 text-sm text-red-600"
+          v-if="errors.email">
+          {{errors.email}}
+        </p>
+      </div>
+      <async-button
+        class="rounded-md bg-green-600 px-3.5 py-2.5 mt-6 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
+        @click="startGame()">
+        Start Game
+      </async-button>
+      <div class="mt-3">
+        <async-button
+          class="rounded-md bg-yellow-600 px-3.5 py-2.5 mt-6 text-sm font-semibold text-white shadow-sm hover:bg-yellow-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-600"
+          @click="$router.push('/leaderboard')">
+          View Leaderboard
+        </async-button>
+      </div>
+
+      <div class="mt-3">
+        <p>
+          Join our <a href="https://join-slack.osohq.com/" target="_blank" class="text-sky-600">Community Slack</a> and find us in the #oso-golf channel!
+        </p>
+
+        <p class="mt-1">The tournament begins on November 15, 2023 at 10AM ET and ends November 15 at 5PM ET. </p>
+
+        <i class="mt-1">By signing up for the tournament via this form, you consent for Oso to communicate with you regarding your participation in The Oso Golf tournament.</i>
+      </div>
+    </div>
   </div>
 </div>
