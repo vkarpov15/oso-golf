@@ -39,18 +39,22 @@ const DeleteFactParams = new Archetype({
   attributeValue: {
     $type: 'string',
     $validate: (v, type, doc) => assert.ok(v != null || doc.factType !== 'attribute')
+  },
+  actorType: {
+    $type: 'string'
   }
 }).compile('DeleteFactParams');
 
-module.exports = extrovert.toNetlifyFunction(async params => {
+module.exports = extrovert.toNetlifyFunction(deleteFact, null, 'deleteFact');
+module.exports.deleteFact = deleteFact;
+
+async function deleteFact(params) {
   params = new DeleteFactParams(params);
 
   await connect();
 
   const { sessionId } = params;
   const player = await Player.findOne({ sessionId }).orFail();
-
-  console.log('Del', params, player.contextFacts);
 
   if (params.factType === 'role') {
     if (params.role === 'superadmin') {
@@ -63,7 +67,7 @@ module.exports = extrovert.toNetlifyFunction(async params => {
     } else {
       player.contextFacts = player.contextFacts.filter(fact => {
         return fact[0] !== 'has_role' ||
-          fact[1].type !== 'User' ||
+          fact[1].type !== (params.actorType ?? 'User') ||
           fact[1].id !== params.userId ||
           fact[2] !== params.role ||
           fact[3]?.type !== params.resourceType ||
@@ -81,11 +85,11 @@ module.exports = extrovert.toNetlifyFunction(async params => {
   } else {
     player.contextFacts = player.contextFacts.filter(fact => {
       return fact[0] !== params.attribute ||
-        fact[1].type !== 'Repository' ||
+        fact[1].type !== params.resourceType ||
         fact[1].id !== params.resourceId ||
         fact[2].id !== params.attributeValue;
     });
   }
   await player.save();
-  return { ok: true };
-}, null, 'deleteFact');
+  return { ok: true, player };
+}

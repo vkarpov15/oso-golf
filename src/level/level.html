@@ -23,14 +23,14 @@
       </div>
 
       <div class="mt-3">
-        <div v-for="fact in state.facts">
+        <div v-for="fact in state.facts" :key="fact._id">
           <div v-if="fact.factType === 'role'">
             {{displayRoleFact(fact)}}
             &nbsp;&nbsp;
             <async-button
               @click="deleteFact(fact)"
               :disabled="deleteInProgress"
-              class="rounded bg-red-600 disabled:bg-gray-700 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+              class="rounded bg-red-600 disabled:bg-gray-300 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
               Delete Fact
             </async-button>
           </div>
@@ -40,7 +40,7 @@
             <async-button
               @click="deleteFact(fact)"
               :disabled="deleteInProgress"
-              class="rounded bg-red-600 disabled:bg-gray-700 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+              class="rounded bg-red-600 disabled:bg-gray-300 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
               Delete Fact
             </async-button>
           </div>

@@ -1,6 +1,7 @@
 'use strict';
 
 const axios = require('axios');
+const bson = require('bson');
 const runTests = require('../_methods/runTests');
 const template = require('./add-role-fact.html');
 const vanillatoasts = require('vanillatoasts');
@@ -81,6 +82,7 @@ module.exports = app => app.component('add-role-fact', {
         resourceId: this.resourceId
       }).then(res => res.data);
       this.state.facts.push({
+        _id: new bson.ObjectId(),
         factType,
         actorType: this.actorType,
         userId: this.userId,

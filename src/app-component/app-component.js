@@ -1,6 +1,7 @@
 'use strict';
 
 const axios = require('axios');
+const bson = require('bson');
 const levels = require('../../levels');
 const runTests = require('../_methods/runTests');
 const setLevel = require('../_methods/setLevel');
@@ -78,6 +79,7 @@ module.exports = app => app.component('app-component', {
       this.state.facts = player.contextFacts.map(fact => {
         if (fact[0] === 'has_role') {
           return {
+            _id: new bson.ObjectId(),
             factType: 'role',
             actorType: fact[1].type,
             userId: fact[1].id,
@@ -87,6 +89,7 @@ module.exports = app => app.component('app-component', {
           };
         } else if (fact[0] === 'has_group') {
           return {
+            _id: new bson.ObjectId(),
             factType: 'attribute',
             attribute: fact[0],
             resourceType: fact[1].type,
@@ -95,6 +98,7 @@ module.exports = app => app.component('app-component', {
           };
         }
         return {
+          _id: new bson.ObjectId(),
           factType: 'attribute',
           attribute: fact[0],
           resourceType: fact[1].type,

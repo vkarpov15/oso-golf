@@ -331,7 +331,7 @@ const level8 = {
     { userId: 'Heather', action: 'write', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true },
     { userId: 'Holly', action: 'write', resourceType: 'Repository', resourceId: 'osohq/sample-apps' },
     { userId: 'Holly', action: 'write', resourceType: 'Repository', resourceId: 'osohq/nodejs-client' },
-    { userId: 'Holly', action: 'write', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true },
+    { userId: 'Holly', action: 'write', resourceType: 'Repository', resourceId: 'osohq/configs', shouldFail: true }
   ],
   par: 6,
   polarCode: dedent(`

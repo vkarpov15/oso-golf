@@ -1,6 +1,7 @@
 'use strict';
 
 const axios = require('axios');
+const bson = require('bson');
 const runTests = require('../_methods/runTests');
 const setLevel = require('../_methods/setLevel');
 const template = require('./level.html');
@@ -187,6 +188,7 @@ module.exports = app => app.component('level', {
         ...this.attributeFact
       }).then(res => res.data);
       this.state.facts.push({
+        _id: new bson.ObjectId(),
         factType,
         userId: this.userId,
         resourceType,
@@ -217,9 +219,11 @@ module.exports = app => app.component('level', {
     async deleteFact(fact) {
       this.deleteInProgress = true;
       try {
+        const params = { ...fact };
+        delete params._id;
         await axios.put('/.netlify/functions/deleteFact', {
           sessionId: this.state.sessionId,
-          ...fact
+          ...params
         }).then(res => res.data);
         this.state.facts = this.state.facts.filter(f => fact !== f);
 
