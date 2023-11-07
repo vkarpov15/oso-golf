@@ -66,7 +66,8 @@ module.exports = app => app.component('level', {
       resourceType: null,
       resourceId: null,
       role: null
-    }
+    },
+    deleteInProgress: false
   }),
   template,
   computed: {
@@ -214,12 +215,18 @@ module.exports = app => app.component('level', {
       return `Repository ${fact.resourceId} has attribute ${fact.attribute} set to ${fact.attributeValue}`;
     },
     async deleteFact(fact) {
-      await axios.put('/.netlify/functions/deleteFact', {
-        sessionId: this.state.sessionId,
-        ...fact
-      }).then(res => res.data);
-      this.state.facts = this.state.facts.filter(f => fact !== f);
-      await runTests(this.state);
+      this.deleteInProgress = true;
+      try {
+        await axios.put('/.netlify/functions/deleteFact', {
+          sessionId: this.state.sessionId,
+          ...fact
+        }).then(res => res.data);
+        this.state.facts = this.state.facts.filter(f => fact !== f);
+
+        await runTests(this.state);
+      } finally {
+        this.deleteInProgress = false;
+      }
     },
     displayImageForTestResult(index) {
       if (!this.state.results[index]) {

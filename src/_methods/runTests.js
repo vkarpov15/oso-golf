@@ -2,11 +2,16 @@
 
 const axios = require('axios');
 
-module.exports = async function runTests(state = window.state) {
+module.exports = asyncQueue(runTests);
+
+window.runTests = runTests;
+
+async function runTests(state = window.state) {
   state.results = [];
   state.showNextLevelButton = null;
   let passed = true;
-  for (const constraint of state.constraints) {
+  const results = [];
+  await Promise.all(state.constraints.map(async (constraint, index) => {
     const authorized = await axios.get('/.netlify/functions/authorize', {
       params: {
         sessionId: state.sessionId,
@@ -17,10 +22,20 @@ module.exports = async function runTests(state = window.state) {
       }
     }).then(res => res.data.authorized);
     const pass = authorized === !constraint.shouldFail;
-    state.results.push({ ...constraint, pass });
+    results[index] = { ...constraint, pass };
     if (!pass) {
       passed = false;
     }
-  }
+  }));
+  state.results = results;
   state.showNextLevelButton = passed;
 };
+
+function asyncQueue(fn) {
+  let promise = Promise.resolve();
+
+  return async function wrappedInQueue() {
+    promise = promise.then(() => fn.apply(this, arguments));
+    return await promise;
+  };
+}
