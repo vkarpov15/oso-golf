@@ -51,26 +51,6 @@ module.exports = app => app.component('app-component', {
     async test() {
       await runTests(this.state);
     },
-    async verifySolutionForLevel() {
-      const { player } = await axios.post('/.netlify/functions/verifySolutionForLevel', {
-        sessionId: this.state.sessionId,
-        level: this.state.level
-      }).then(res => res.data);
-      this.state.level = player.levelsCompleted + 1;
-      this.state.par = player.par;
-      this.state.results = [];
-      this.state.showNextLevelButton = false;
-      this.state.facts = [];
-
-      setLevel(player.levelsCompleted + 1, false, this.state);
-      
-      if (this.state.level < levels.length + 1) {
-        this.state.currentLevel = levels[this.state.level - 1];
-        this.state.constraints = this.state.currentLevel.constraints;
-        await this.loadFacts();
-        await this.test();
-      }
-    },
     restart() {
       window.localStorage.setItem('_gitclubGameSession', '');
       window.location.reload();

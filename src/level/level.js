@@ -245,6 +245,7 @@ module.exports = app => app.component('level', {
       }).then(res => res.data);
       
       await setLevel(player.levelsCompleted + 1, false, this.state);
+      this.state.par = player.par;
       await runTests(this.state);
     }
   }

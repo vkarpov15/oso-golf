@@ -5,6 +5,11 @@
       {{constraint.userId}} {{constraint.shouldFail ? 'cannot' : 'can'}} {{constraint.action}} {{constraint.resourceType}} {{constraint.resourceId}}
     </div>
     <div class="text-sm text-gray-500 mt-1">
-      {{testsInProgress ? 'Tests running on Oso Cloud...' : 'Tests ran successfully on Oso Cloud'}}
+      <span v-show="testsInProgress">
+        Tests running on <a href="https://cloud.osohq.com/" class="text-sky-600" target="_blank">Oso Cloud</a>...
+      </span>
+      <span v-show="!testsInProgress">
+        Tests ran successfully on <a href="https://cloud.osohq.com/" class="text-sky-600" target="_blank">Oso Cloud</a>
+      </span>
     </div>
 </div>
