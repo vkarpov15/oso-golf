@@ -1,0 +1,12 @@
+<transition name="modal">
+  <div class="modal-mask">
+    <div class="modal-wrapper">
+      <div class="modal-container">
+        <div class="modal-close" @click="$emit('close')">&times;</div>
+        <div class="modal-body">
+          <slot></slot>
+        </div>
+      </div>
+    </div>
+  </div>
+</transition>

@@ -68,7 +68,8 @@ module.exports = app => app.component('level', {
       resourceId: null,
       role: null
     },
-    deleteInProgress: false
+    deleteInProgress: false,
+    showDeleteAllModal: false
   }),
   template,
   computed: {
@@ -226,6 +227,19 @@ module.exports = app => app.component('level', {
           ...params
         }).then(res => res.data);
         this.state.facts = this.state.facts.filter(f => fact !== f);
+
+        await runTests(this.state);
+      } finally {
+        this.deleteInProgress = false;
+      }
+    },
+    async deleteAllFacts() {
+      this.deleteInProgress = true;
+      try {
+        await axios.put('/.netlify/functions/clearContextFacts', {
+          sessionId: this.state.sessionId
+        }).then(res => res.data);
+        this.state.facts = [];
 
         await runTests(this.state);
       } finally {

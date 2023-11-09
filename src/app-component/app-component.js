@@ -11,7 +11,8 @@ module.exports = app => app.component('app-component', {
   inject: ['state'],
   data: () => ({
     currentTime: new Date(),
-    status: 'loading'
+    status: 'loading',
+    showRestartConfirmModal: false
   }),
   template,
   computed: {

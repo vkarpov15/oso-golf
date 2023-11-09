@@ -378,7 +378,7 @@ const level8 = {
   groups: ['superstars'],
   repositories: ['osohq/sample-apps', 'osohq/nodejs-client', 'osohq/configs'],
   description: dedent(`
-  Users can also belong to groups, which can have multiple roles. Group membership is just an attribute  Add some users and roles to the "superstars" group to complete this hole. "has_group" is just an attribute on users.
+  Users can also belong to groups, which can have multiple roles. Group membership is just an attribute. Add some users and roles to the "superstars" group to complete this hole. "has_group" is just an attribute on users.
   `)
 };
 
