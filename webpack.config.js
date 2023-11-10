@@ -22,5 +22,10 @@ module.exports = {
         type: 'asset/source'
       }
     ]
-  }
+  },
+  plugins: [
+    new webpack.DefinePlugin({
+      HAS_PASSWORD: `${!!process.env.OSO_GOLF_PASSWORD}` // Note that the raw string is wrapped in quotes
+    })
+  ]
 };

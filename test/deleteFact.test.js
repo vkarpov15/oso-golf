@@ -17,6 +17,7 @@ describe('deleteFact', function() {
   });
 
   it('deletes group role facts', async function() {
+    await Player.deleteMany({});
     let player = await Player.create({
       sessionId: '111',
       email: 'test@osohq.com',

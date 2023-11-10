@@ -33,11 +33,17 @@ app.use('/.netlify/functions', express.json(), function netlifyFunctionsMiddlewa
   action.handler(params).
     then(result => {
       if (result.statusCode >= 400) {
-        return res.status(400).json({ message: result.body });
+        let message = result.body;
+        try {
+          message = JSON.parse(message);
+        } catch (err) {}
+        return res.status(400).json(typeof message === 'string' ? { message } : message);
       }
       res.json(JSON.parse(result.body));
     }).
-    catch(err => res.status(500).json({ message: err.message, stack: err.stack }));
+    catch(err => {
+      res.status(500).json({ message: err.message, stack: err.stack });
+    });
 });
 
 mongoose.connect(process.env.MONGODB_CONNECTION_STRING);

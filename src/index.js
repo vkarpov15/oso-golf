@@ -44,8 +44,9 @@ const app = Vue.createApp({
     return state;
   },
   async errorCaptured(err) {
+    const title = err?.response?.data?.message ?? err.message;
     vanillatoasts.create({
-      title: err.message,
+      title,
       icon: '/images/failure.jpg',
       timeout: 5000,
       positionClass: 'bottomRight'

@@ -18,11 +18,18 @@ const StartGameParams = new Archetype({
   email: {
     $type: 'string',
     $required: true
+  },
+  password: {
+    $type: 'string'
   }
 }).compile('StartGameParams');
 
 module.exports = extrovert.toNetlifyFunction(async params => {
-  const { sessionId, name, email } = new StartGameParams(params);
+  const { sessionId, name, email, password } = new StartGameParams(params);
+
+  if (process.env.OSO_GOLF_PASSWORD && process.env.OSO_GOLF_PASSWORD !== password) {
+    throw new Error('Incorrect password');
+  }
 
   await connect();
   

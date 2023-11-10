@@ -6,9 +6,15 @@ const template = require('./splash-screen.html');
 
 module.exports = app => app.component('splash-screen', {
   inject: ['state'],
-  data: () => ({ email: '', name: '', errors: {} }),
+  data: () => ({ email: '', name: '', password: '', errors: {} }),
   props: ['onStartGame'],
   template,
+  computed: {
+    hasPassword() {
+      console.log('GG', HAS_PASSWORD);
+      return HAS_PASSWORD;
+    }
+  },
   methods: {
     async startGame() {
       if (this.state.level !== 0) {
@@ -21,6 +27,9 @@ module.exports = app => app.component('splash-screen', {
       if (!this.name) {
         this.errors.name = 'Name is required';
       }
+      if (!this.password && this.hasPassword) {
+        this.errors.password = 'Password is required';
+      }
       if (Object.keys(this.errors).length > 0) {
         return;
       }
@@ -28,7 +37,8 @@ module.exports = app => app.component('splash-screen', {
       const { player } = await axios.post('/.netlify/functions/startGame', {
         sessionId: this.state.sessionId,
         name: this.name,
-        email: this.email
+        email: this.email,
+        password: this.password
       }).then(res => res.data);
 
       this.state.level = 1;
