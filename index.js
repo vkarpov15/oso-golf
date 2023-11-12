@@ -39,7 +39,24 @@ app.use('/.netlify/functions', express.json(), function netlifyFunctionsMiddlewa
         } catch (err) {}
         return res.status(400).json(typeof message === 'string' ? { message } : message);
       }
-      res.json(JSON.parse(result.body));
+      let isHtml = false;
+      if (result.headers) {
+        res.set(result.headers);
+      }
+      try {
+        result.body = JSON.parse(result.body);
+        isHtml = false;
+      } catch (err) {
+        isHtml = true;
+      }
+      if (isHtml) {
+        if (result.isBase64Encoded) {
+          result.body = Buffer.from(result.body, 'base64');
+        }
+        res.end(result.body);
+      } else {
+        res.json(result.body);
+      }
     }).
     catch(err => {
       res.status(500).json({ message: err.message, stack: err.stack });

@@ -105,6 +105,8 @@ module.exports = app => app.component('app-component', {
     await setLevel(player.levelsCompleted + 1, true, this.state);
     this.state.par = player.par;
     this.state.startTime = new Date(player.startTime);
+    this.state.name = player.name;
+    this.state.player = player;
     this.loadFacts(player);
     this.status = 'loaded';
     await this.test();

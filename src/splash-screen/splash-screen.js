@@ -11,7 +11,6 @@ module.exports = app => app.component('splash-screen', {
   template,
   computed: {
     hasPassword() {
-      console.log('GG', HAS_PASSWORD);
       return HAS_PASSWORD;
     }
   },
