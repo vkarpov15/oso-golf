@@ -10,7 +10,6 @@
     "es6": true
   },
   "globals": {
-    "HAS_PASSWORD": true,
-    "chromium": true
+    "HAS_PASSWORD": true
   }
 }
