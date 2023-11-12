@@ -40,10 +40,12 @@ exports.handler = async function ogimage(event) {
   Scorecard(app);
 
   const browser = await puppeteer.launch({
-    args: chromium.args,
-    defaultViewport: { height: 630, width: 1200 },
-    executablePath: await chromium.executablePath,
-    headless: chromium.headless
+    headless: true,
+    args: ['--no-sandbox'],
+    defaultViewport: {
+      width: 1200,
+      height: 630
+    }
   });
   const page = await browser.newPage();
 
@@ -59,8 +61,8 @@ exports.handler = async function ogimage(event) {
       }
     </style>
   </head>
-  <body style="border: 8px solid #6366f2; display: flex; flex-direction: row;">
-    <div class="m-auto w-full px-4">
+  <body style="border: 12px solid #6366f2; display: flex; flex-direction: row;">
+    <div class="m-auto w-full" style="padding-left: 18px; padding-right: 18px">
       <div style="align-items: center; justify-items: center" class="text-4xl font-bold tracking-tight sm:text-6xl mt-3 mb-3 flex gap-2">
         <div>
           <img style="height: 4em" src="https://oso-golf.netlify.app/images/oso-golf-bear-no-bg.png">
