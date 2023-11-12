@@ -10,7 +10,7 @@ const Player = require('../../db/player');
 const Scorecard = require('../../src/scorecard/scorecard');
 const { createSSRApp, provide, reactive } = require('vue');
 const connect = require('../../db/connect');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 const { renderToString } = require('vue/server-renderer');
 
 // Source: https://michaelheap.com/netlify-function-lambda-return-image/
@@ -27,7 +27,7 @@ exports.handler = async function ogimage(event) {
   const player = await Player.findOne({ sessionId }).orFail();
 
   const app = createSSRApp({
-    template: `<scorecard />`,
+    template: '<scorecard />',
     setup() {
       const state = reactive({
         name: player.name,
@@ -40,16 +40,14 @@ exports.handler = async function ogimage(event) {
   Scorecard(app);
 
   const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox"],
-    defaultViewport: {
-      width: 1200,
-      height: 630,
-    }
+    args: chromium.args,
+    defaultViewport: { height: 630, width: 1200 },
+    executablePath: await chromium.executablePath,
+    headless: chromium.headless
   });
   const page = await browser.newPage();
 
-  const compiledHTML =`<html>
+  const compiledHTML = `<html>
   <head>
     <link rel="stylesheet" type="text/css" href="https://oso-golf.netlify.app/style.css"/>
     <link rel="icon" type="image/png" href="https://oso-golf.netlify.app/images/oso-golf-bear-no-bg.png">
@@ -86,9 +84,9 @@ exports.handler = async function ogimage(event) {
   return {
     statusCode: 200,
     headers: {
-      "Content-Type": "image/png",
+      'Content-Type': 'image/png'
     },
-    body: image.toString("base64"),
+    body: image.toString('base64'),
     isBase64Encoded: true 
-  }
+  };
 };

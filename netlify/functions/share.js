@@ -25,7 +25,7 @@ exports.handler = async function share(event) {
   const player = await Player.findOne({ sessionId }).orFail();
 
   const app = createSSRApp({
-    template: `<scorecard />`,
+    template: '<scorecard />',
     setup() {
       const state = reactive({
         name: player.name,
@@ -78,5 +78,5 @@ exports.handler = async function share(event) {
       </div>
     </body>
     </html>`
-  }
+  };
 };
