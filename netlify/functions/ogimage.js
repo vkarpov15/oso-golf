@@ -9,9 +9,8 @@ require.extensions['.html'] = function(module, filename) {
 const Player = require('../../db/player');
 const Scorecard = require('../../src/scorecard/scorecard');
 const { createSSRApp, provide, reactive } = require('vue');
-const chromium = require("chrome-aws-lambda");
 const connect = require('../../db/connect');
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 const { renderToString } = require('vue/server-renderer');
 
 // Source: https://michaelheap.com/netlify-function-lambda-return-image/
