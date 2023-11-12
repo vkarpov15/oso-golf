@@ -44,7 +44,7 @@ exports.handler = async function share(event) {
       <link rel="stylesheet" type="text/css" href="/style.css"/>
       <link rel="icon" type="image/png" href="/images/oso-golf-bear-no-bg.png">
       <meta property="og:image" content="https://oso-golf.netlify.app/.netlify/functions/ogimage?sessionId=${sessionId}"/>
-      <meta property="og:title" content="Oso Golf Scorecard"/>
+      <meta property="og:title" content="${player.name}'s Oso Golf Scorecard"/>
       <meta property="og:type" content="website"/>
       <meta property="og:url" content="https://oso-golf.netlify.app"/>
       <meta property="og:description" content="Oso Golf is a logic game, similar to “Regex Golf”, that is designed to teach you authorization principles by completing permissions with as few objects as possible."/>
