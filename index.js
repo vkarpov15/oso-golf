@@ -65,7 +65,7 @@ app.use('/.netlify/functions', express.json(), function netlifyFunctionsMiddlewa
 
 mongoose.connect(process.env.MONGODB_CONNECTION_STRING);
 
-app.use('/studio', require('@mongoosejs/studio/express')('/studio/api'));
+// app.use('/studio', require('@mongoosejs/studio/express')('/studio/api'));
 
 app.use(express.static('./public'));
 app.get('*', (req, res) => {
