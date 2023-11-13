@@ -61,19 +61,18 @@ exports.handler = async function ogimage(event) {
       }
     </style>
   </head>
-  <body style="border: 12px solid #6366f2; display: flex; flex-direction: row;">
-    <div class="m-auto w-full" style="padding-left: 18px; padding-right: 18px">
-      <div style="align-items: center; justify-items: center" class="text-4xl font-bold tracking-tight sm:text-6xl mt-3 mb-3 flex gap-2">
+  <body style="border: 16px solid #6366f2; display: flex; flex-direction: row; height: 630px">
+    <div class="m-auto w-full; height: 630px;" style="padding-left: 18px; padding-right: 18px">
+      <div style="align-items: center; line-height: 1.25em; justify-items: center; font-size: 96px" class="font-bold tracking-tight sm:text-6xl flex gap-2">
         <div>
-          <img style="height: 4em" src="https://oso-golf.netlify.app/images/oso-golf-bear-no-bg.png">
+          <img style="height: 6em" src="https://oso-golf.netlify.app/images/oso-golf-bear-no-bg.png">
         </div>
         <div>
           <div>
-            Oso Golf Scorecard
+            My Oso Golf Scorecard
           </div>
         </div>
       </div>
-      ${await renderToString(app)}
     </div>
   </body>
   </html>`;
