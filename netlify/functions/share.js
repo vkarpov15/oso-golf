@@ -15,6 +15,8 @@ const connect = require('../../db/connect');
 const { renderToString } = require('vue/server-renderer');
 
 exports.handler = async function share(event) {
+  console.log('Share', event);
+
   const sessionId = event.queryStringParameters.sessionId;
   if (!sessionId) {
     return {
@@ -91,4 +93,8 @@ exports.handler = async function share(event) {
     </body>
     </html>`
   };
+};
+
+exports.config = {
+  path: '/share/:sessionId'
 };
