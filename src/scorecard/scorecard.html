@@ -11,6 +11,7 @@
       <tr>
         <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6 border-black border" style="border: 1px solid black">{{state.name}}</td>
         <td v-for="index in holes" class="whitespace-nowrap px-3 py-4 text-sm text-gray-900 border-black border" style="border: 1px solid black">{{displayPar(state.player?.parPerLevel?.[index - 1], levels[index - 1].par)}}</td>
+        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900 border-black border" style="border: 1px solid black"><b>{{totalParScore}}</b></td>
       </tr>
       <tr style="background-color: #ddd">
         <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6 border-black border" style="border: 1px solid black">PAR</td>
