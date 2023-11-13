@@ -260,6 +260,7 @@ module.exports = app => app.component('level', {
       
       await setLevel(player.levelsCompleted + 1, false, this.state);
       this.state.par = player.par;
+      this.state.player = player;
       await runTests(this.state);
     }
   }

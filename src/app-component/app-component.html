@@ -46,11 +46,27 @@
       </div>
     </div>
     <level @test="test" @loadFacts="loadFacts" :status="status"></level>
+  
+    <div class="mt-3">
+      <scorecard />
+    </div>
   </div>
   <div v-show="state.level >= levels.length + 1">
+    <div class="text-4xl font-bold tracking-tight sm:text-6xl mb-0.5 flex gap-2">
+      <div>
+        <img class="h-[1em]" src="https://ui.osohq.com/logo-bear-black.png">
+      </div>
+      <div>
+        Oso Golf
+      </div>
+    </div>
+
     <div class="text-2xl font-bold leading-9 tracking-tight">
       You completed the game!
     </div>
+
+    <scorecard />
+
     <div>
       Congratulations! Check out where you placed on the <router-link to="/leaderboard" class="text-sky-700">leaderboard</router-link>.
     </div>
@@ -63,8 +79,6 @@
       </async-button>
     </div>
   </div>
-
-  <scorecard />
 
   <oso-footer></oso-footer>
 </div>
