@@ -48,16 +48,15 @@ exports.handler = async function share(event) {
     <head>
       <link rel="stylesheet" type="text/css" href="/style.css"/>
       <link rel="icon" type="image/png" href="/images/oso-golf-bear-no-bg.png">
-      <meta property="og:image" content="https://oso-golf.netlify.app/images/social2.png"/>
+      <meta property="og:image" content="https://oso-golf.netlify.app/images/social.png"/>
       <meta property="og:title" content="${name}'s Oso Golf Scorecard"/>
       <meta property="og:type" content="website"/>
-      <meta property="og:url" content="https://oso-golf.netlify.app"/>
-      <meta property="og:description" content="Oso Golf is a logic game, similar to “Regex Golf”, that is designed to teach you authorization principles by completing permissions with as few objects as possible."/>
+      <meta property="og:description" content="Oso Golf is a logic game, similar to Regex Golf, that is designed to teach you authorization principles by completing permissions with as few objects as possible."/>
       
       <meta name="twitter:image:alt" content="${name}'s Oso Golf Scorecard">
       <meta name="twitter:title" content="${name}'s Oso Golf Scorecard">
-      <meta name="twitter:description" content="Oso Golf is a logic game, similar to “Regex Golf”, that is designed to teach you authorization principles by completing permissions with as few objects as possible.">
-      <meta name="twitter:image" content="https://oso-golf.netlify.app/images/social2.png">
+      <meta name="twitter:description" content="Oso Golf is a logic game, similar to Regex Golf, that is designed to teach you authorization principles by completing permissions with as few objects as possible.">
+      <meta name="twitter:image" content="https://oso-golf.netlify.app/images/social.png">
 
       <title>${name}'s Oso Golf Scorecard</title>
     </head>
