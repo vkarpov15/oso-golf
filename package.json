@@ -22,7 +22,8 @@
     "vanillatoasts": "1.4.0",
     "vue": "3.x",
     "vue-router": "4.0.10",
-    "webpack": "5.72.1"
+    "webpack": "5.72.1",
+    "xss": "1.0.14"
   },
   "devDependencies": {
     "@masteringjs/eslint-config": "0.0.1",
