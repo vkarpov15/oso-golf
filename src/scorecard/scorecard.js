@@ -14,6 +14,9 @@ module.exports = app => app.component('scorecard', {
       return levels;
     },
     totalParScore() {
+      if (!this.state.player) {
+        return 0;
+      }
       return this.state.player.parPerLevel.reduce((sum, v) => sum + v, 0) + this.parTotal;
     },
     parTotal() {
