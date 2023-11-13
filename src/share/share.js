@@ -17,7 +17,7 @@ module.exports = app => app.component('share', {
         `Try to beat my ${displayPar} score on Oso Golf!\n\n`
       );
       const shareUrl = encodeURIComponent(
-        'https://oso-golf.netlify.app/.netlify/functions/share?sessionId=' +
+        'https://oso-golf.netlify.app/.netlify/functions/share/' +
           encodeURIComponent(this.state.player.sessionId)
       );
 
@@ -29,7 +29,7 @@ module.exports = app => app.component('share', {
       }
 
       const shareUrl = encodeURIComponent(
-        'https://oso-golf.netlify.app/.netlify/functions/share?sessionId=' +
+        'https://oso-golf.netlify.app/.netlify/functions/share/' +
           encodeURIComponent(this.state.player.sessionId)
       );
       return `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`;

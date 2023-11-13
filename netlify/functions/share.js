@@ -17,7 +17,7 @@ const { renderToString } = require('vue/server-renderer');
 exports.handler = async function share(event) {
   console.log('Share', event);
 
-  const sessionId = event.queryStringParameters.sessionId;
+  const sessionId = event.queryStringParameters.sessionId || event.path.slice(event.path.lastIndexOf('/') + 1);
   if (!sessionId) {
     return {
       statusCode: 404,
