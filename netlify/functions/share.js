@@ -8,6 +8,7 @@ require.extensions['.html'] = function(module, filename) {
 
 const Player = require('../../db/player');
 const Scorecard = require('../../src/scorecard/scorecard');
+const Share = require('../../src/share/share');
 const { createSSRApp, provide, reactive } = require('vue');
 const connect = require('../../db/connect');
 const { renderToString } = require('vue/server-renderer');
@@ -25,7 +26,7 @@ exports.handler = async function share(event) {
   const player = await Player.findOne({ sessionId }).orFail();
 
   const app = createSSRApp({
-    template: '<scorecard />',
+    template: '<scorecard /><share />',
     setup() {
       const state = reactive({
         name: player.name,
@@ -36,6 +37,7 @@ exports.handler = async function share(event) {
     }
   });
   Scorecard(app);
+  Share(app);
 
   return {
     statusCode: 200,
@@ -43,7 +45,7 @@ exports.handler = async function share(event) {
     <head>
       <link rel="stylesheet" type="text/css" href="/style.css"/>
       <link rel="icon" type="image/png" href="/images/oso-golf-bear-no-bg.png">
-      <meta property="og:image" content="https://oso-golf.netlify.app/.netlify/functions/ogimage?sessionId=${sessionId}"/>
+      <meta property="og:image" content="https://oso-golf.netlify.app/images/social.png"/>
       <meta property="og:title" content="${player.name}'s Oso Golf Scorecard"/>
       <meta property="og:type" content="website"/>
       <meta property="og:url" content="https://oso-golf.netlify.app"/>
