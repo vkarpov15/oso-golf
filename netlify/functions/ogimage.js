@@ -15,27 +15,12 @@ const { renderToString } = require('vue/server-renderer');
 
 // Source: https://michaelheap.com/netlify-function-lambda-return-image/
 exports.handler = async function ogimage(event) {
-  const sessionId = event.queryStringParameters.sessionId;
-  if (!sessionId) {
-    return {
-      statusCode: 404,
-      body: '<html><h1>Not Found</h1></html>'
-    };
-  }
+
 
   await connect();
-  const player = await Player.findOne({ sessionId }).orFail();
 
   const app = createSSRApp({
     template: '<scorecard />',
-    setup() {
-      const state = reactive({
-        name: player.name,
-        player: player.toObject()
-      });
-  
-      provide('state', state);
-    }
   });
   Scorecard(app);
 
@@ -44,7 +29,7 @@ exports.handler = async function ogimage(event) {
     args: ['--no-sandbox'],
     defaultViewport: {
       width: 1200,
-      height: 630
+      height: 600
     }
   });
   const page = await browser.newPage();
@@ -54,26 +39,28 @@ exports.handler = async function ogimage(event) {
     <link rel="stylesheet" type="text/css" href="https://oso-golf.netlify.app/style.css"/>
     <link rel="icon" type="image/png" href="https://oso-golf.netlify.app/images/oso-golf-bear-no-bg.png">
 
-    <title>${player.name}'s Oso Golf Scorecard</title>
+    <title>My Oso Golf Scorecard</title>
     <style>
       .scorecard {
         font-size: 32px !important;
       }
     </style>
   </head>
-  <body style="border: 12px solid #6366f2; display: flex; flex-direction: row;">
+  <body style="border: 18px solid #6366f2; display: flex; flex-direction: row; height: 600px">
     <div class="m-auto w-full" style="padding-left: 18px; padding-right: 18px">
-      <div style="align-items: center; justify-items: center" class="text-4xl font-bold tracking-tight sm:text-6xl mt-3 mb-3 flex gap-2">
+      <div style="align-items: center; justify-items: center; line-height: 1.25em; font-size: 96px" class="font-bold tracking-tight sm:text-6xl mt-3 mb-3 flex gap-2">
         <div>
-          <img style="height: 4em" src="https://oso-golf.netlify.app/images/oso-golf-bear-no-bg.png">
+          <img style="height: 6em" src="https://oso-golf.netlify.app/images/oso-golf-bear-no-bg.png">
         </div>
         <div>
           <div>
-            Oso Golf Scorecard
+            My Oso Golf Scorecard
           </div>
         </div>
       </div>
-      ${await renderToString(app)}
+      <div style="position: absolute; left: 1040px; top: 460px;">
+        <img src="https://valeri-karpov-test.s3.amazonaws.com/logo-black.png" style="width: 120px">
+      </div>
     </div>
   </body>
   </html>`;
