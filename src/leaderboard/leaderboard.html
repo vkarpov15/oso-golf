@@ -26,7 +26,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200 bg-white">
                   <tr v-for="(player, index) in players">
-                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">#{{index}}</td>
+                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">#{{index + 1}}</td>
                     <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{player.name}} <img class="inline" v-if="index === 0" src="/images/trophy-gold.svg"><img class="inline" v-if="index === 1" src="/images/trophy-silver.svg"><img class="inline" v-if="index === 2" src="/images/trophy-bronze.svg"></td>
                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{player.levelsCompleted}}</td>
                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{par(player)}}</td>
