@@ -1,10 +1,12 @@
 'use strict';
 
 const Archetype = require('archetype');
+const Log = require('../../db/log'); 
 const Player = require('../../db/player');
 const assert = require('assert');
 const connect = require('../../db/connect');
 const extrovert = require('extrovert');
+const { inspect } = require('util');
 const levels = require('../../levels');
 const oso = require('../../oso');
 
@@ -29,30 +31,44 @@ module.exports = extrovert.toNetlifyFunction(async params => {
 
   await connect();
   
-  const player = await Player.findOne({ sessionId }).orFail();
+  await Log.info(`Verify solution ${level} ${inspect(params)}`, { ...params, function: 'verifySolutionForLevel' });
 
-  const constraints = constraintsByLevel[level - 1];
-  let pass = true;
-  for (const constraint of constraints) {
-    const authorized = await oso.authorize(
-      { type: 'User', id: constraint.userId },
-      constraint.action,
-      { type: constraint.resourceType, id: constraint.resourceId },
-      player.contextFacts
-    );
-    if (authorized !== !constraint.shouldFail) {
-      pass = false;
+  try {
+    const player = await Player.findOne({ sessionId }).orFail();
+
+    const constraints = constraintsByLevel[level - 1];
+    let pass = true;
+    for (const constraint of constraints) {
+      const authorized = await oso.authorize(
+        { type: 'User', id: constraint.userId },
+        constraint.action,
+        { type: constraint.resourceType, id: constraint.resourceId },
+        player.contextFacts
+      );
+      if (authorized !== !constraint.shouldFail) {
+        pass = false;
+      }
     }
-  }
-  if (!pass) {
-    throw new Error('Did not pass');
-  }
+    if (!pass) {
+      throw new Error('Did not pass');
+    }
 
-  player.levelsCompleted = player.levelsCompleted + 1;
-  player.parPerLevel[level - 1] = player.contextFacts.length - parByLevel[level - 1];
-  player.par = player.parPerLevel.reduce((sum, v) => sum + v);
-  player.gameplayTimeMS = Date.now() - player.startTime.valueOf();
-  await player.save();
-  
-  return { player };
+    player.levelsCompleted = player.levelsCompleted + 1;
+    player.parPerLevel[level - 1] = player.contextFacts.length - parByLevel[level - 1];
+    player.par = player.parPerLevel.reduce((sum, v) => sum + v);
+    player.gameplayTimeMS = Date.now() - player.startTime.valueOf();
+    await player.save();
+    
+    return { player };
+  } catch (err) {
+    await Log.error(`verifySolutionForLevel: ${err.message}`, {
+      ...params,
+      function: 'verifySolutionForLevel',
+      message: err.message,
+      stack: err.stack,
+      err: inspect(err)
+    });
+
+    throw err;
+  }
 }, null, 'verifySolutionForLevel');

@@ -1,9 +1,11 @@
 'use strict';
 
 const Archetype = require('archetype');
+const Log = require('../../db/log'); 
 const Player = require('../../db/player');
 const connect = require('../../db/connect');
 const extrovert = require('extrovert');
+const { inspect } = require('util');
 
 const ResumeGameParams = new Archetype({
   sessionId: {
@@ -16,10 +18,27 @@ module.exports = extrovert.toNetlifyFunction(async params => {
   const { sessionId } = new ResumeGameParams(params);
 
   await connect();
-  
-  const player = await Player.findOne({
-    sessionId
+
+  await Log.info(`resumeGame ${inspect(params)}`, {
+    ...params,
+    function: 'resumeGame'
   });
   
-  return { player };
+  try {
+    const player = await Player.findOne({
+      sessionId
+    });
+
+    return { player };
+  } catch (err) {
+    await Log.error(`resumeGame: ${err.message}`, {
+      ...params,
+      function: 'resumeGame',
+      message: err.message,
+      stack: err.stack,
+      err: inspect(err)
+    });
+
+    throw err;
+  }
 }, null, 'resumeGame');

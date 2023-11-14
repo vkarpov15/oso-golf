@@ -1,9 +1,11 @@
 'use strict';
 
 const Archetype = require('archetype');
+const Log = require('../../db/log'); 
 const Player = require('../../db/player');
 const connect = require('../../db/connect');
 const extrovert = require('extrovert');
+const { inspect } = require('util');
 const oso = require('../../oso');
 
 const AuthorizeParams = new Archetype({
@@ -35,15 +37,32 @@ module.exports = extrovert.toNetlifyFunction(async params => {
 
   await connect();
 
-  const player = await Player.findOne({ sessionId }).orFail();
+  await Log.info(`authorize ${inspect(params)}`, {
+    ...params,
+    function: 'authorize'
+  });
 
-  console.log('Authorize', params, player.contextFacts);
+  try {
+    const player = await Player.findOne({ sessionId }).orFail();
 
-  const authorized = await oso.authorize(
-    { type: 'User', id: params.userId },
-    params.action,
-    { type: params.resourceType, id: params.resourceId },
-    player.contextFacts
-  );
-  return { authorized };
+    console.log('Authorize', params, player.contextFacts);
+
+    const authorized = await oso.authorize(
+      { type: 'User', id: params.userId },
+      params.action,
+      { type: params.resourceType, id: params.resourceId },
+      player.contextFacts
+    );
+    return { authorized };
+  } catch (err) {
+    await Log.error(`authorize: ${err.message}`, {
+      ...params,
+      function: 'authorize',
+      message: err.message,
+      stack: err.stack,
+      err: inspect(err)
+    });
+
+    throw err;
+  }
 }, null, 'authorize');

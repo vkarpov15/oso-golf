@@ -1,11 +1,12 @@
 'use strict';
 
 const Archetype = require('archetype');
+const Log = require('../../db/log');
 const Player = require('../../db/player');
 const assert = require('assert');
 const connect = require('../../db/connect');
 const extrovert = require('extrovert');
-const oso = require('../../oso');
+const { inspect } = require('util');
 
 const TellParams = new Archetype({
   sessionId: {
@@ -52,46 +53,60 @@ module.exports = extrovert.toNetlifyFunction(async params => {
   params = new TellParams(params);
   await connect();
 
-  const { sessionId } = params;
+  await Log.info(`Tell ${inspect(params)}`, { ...params, function: 'tell' });
 
-  const player = await Player.findOne({ sessionId }).orFail();
+  try {
+    const { sessionId } = params;
 
-  if (params.factType === 'role') {
-    if (params.role === 'superadmin') {
+    const player = await Player.findOne({ sessionId }).orFail();
+
+    if (params.factType === 'role') {
+      if (params.role === 'superadmin') {
+        player.contextFacts.push([
+          'has_role',
+          { type: params.actorType, id: params.userId },
+          params.role
+        ]);
+      } else {
+        player.contextFacts.push([
+          'has_role',
+          { type: params.actorType, id: params.userId },
+          params.role,
+          { type: params.resourceType, id: params.resourceId }
+        ]);
+      }
+    } else if (params.attribute === 'has_default_role') {
       player.contextFacts.push([
-        'has_role',
-        { type: params.actorType, id: params.userId },
-        params.role
+        params.attribute,
+        { type: params.resourceType, id: params.resourceId },
+        params.attributeValue
+      ]);
+    } else if (params.attribute === 'has_group') {
+      player.contextFacts.push([
+        params.attribute,
+        { type: params.resourceType, id: params.resourceId },
+        { type: 'Group', id: params.attributeValue }
       ]);
     } else {
       player.contextFacts.push([
-        'has_role',
-        { type: params.actorType, id: params.userId },
-        params.role,
-        { type: params.resourceType, id: params.resourceId }
+        params.attribute,
+        { type: params.resourceType, id: params.resourceId },
+        { type: 'Boolean', id: params.attributeValue }
       ]);
     }
-  } else if (params.attribute === 'has_default_role') {
-    player.contextFacts.push([
-      params.attribute,
-      { type: params.resourceType, id: params.resourceId },
-      params.attributeValue
-    ]);
-  } else if (params.attribute === 'has_group') {
-    player.contextFacts.push([
-      params.attribute,
-      { type: params.resourceType, id: params.resourceId },
-      { type: 'Group', id: params.attributeValue }
-    ]);
-  } else {
-    player.contextFacts.push([
-      params.attribute,
-      { type: params.resourceType, id: params.resourceId },
-      { type: 'Boolean', id: params.attributeValue }
-    ]);
+
+    await player.save();
+
+    return { ok: true };
+  } catch (err) {
+    await Log.error(`tell: ${err.message}`, {
+      ...params,
+      function: 'tell',
+      message: err.message,
+      stack: err.stack,
+      err: inspect(err)
+    });
+
+    throw err;
   }
-
-  await player.save();
-
-  return { ok: true };
 }, null, 'tell');
