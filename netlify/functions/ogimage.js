@@ -29,7 +29,7 @@ exports.handler = async function ogimage(event) {
     args: ['--no-sandbox'],
     defaultViewport: {
       width: 1200,
-      height: 600
+      height: 628
     }
   });
   const page = await browser.newPage();
@@ -46,7 +46,7 @@ exports.handler = async function ogimage(event) {
       }
     </style>
   </head>
-  <body style="border: 18px solid #6366f2; display: flex; flex-direction: row; height: 600px">
+  <body style="border: 18px solid #6366f2; display: flex; flex-direction: row; height: 628px">
     <div class="m-auto w-full" style="padding-left: 18px; padding-right: 18px">
       <div style="align-items: center; justify-items: center; line-height: 1.25em; font-size: 96px" class="font-bold tracking-tight sm:text-6xl mt-3 mb-3 flex gap-2">
         <div>
@@ -58,7 +58,7 @@ exports.handler = async function ogimage(event) {
           </div>
         </div>
       </div>
-      <div style="position: absolute; left: 1040px; top: 460px;">
+      <div style="position: absolute; left: 1040px; top: 488px;">
         <img src="https://valeri-karpov-test.s3.amazonaws.com/logo-black.png" style="width: 120px">
       </div>
     </div>
