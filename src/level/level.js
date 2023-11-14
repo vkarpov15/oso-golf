@@ -215,7 +215,8 @@ module.exports = app => app.component('level', {
       if (fact.attribute === 'has_group') {
         return `User ${fact.resourceId} belongs to Group ${fact.attributeValue}`;
       }
-      return `Repository ${fact.resourceId} has attribute ${fact.attribute} set to ${fact.attributeValue}`;
+      const resourceType = fact.resourceType ?? 'Repository';
+      return `${resourceType} ${fact.resourceId} has attribute ${fact.attribute} set to ${fact.attributeValue}`;
     },
     async deleteFact(fact) {
       this.deleteInProgress = true;
