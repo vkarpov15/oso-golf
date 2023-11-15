@@ -7,14 +7,28 @@ const extrovert = require('extrovert');
 module.exports = extrovert.toNetlifyFunction(async() => {
   await connect();
   
-  const players = await Player
+  const playersFromDb = await Player
     .find({ levelsCompleted: { $gt: 0 } })
-    .select({ email: 0 })
+    .select()
     .sort({
       levelsCompleted: -1,
       par: 1,
       gameplayTimeMS: 1
     });
+
+  const playersByEmail = new Map();
+  for (const player of playersFromDb) {
+    if (playersByEmail.has(player.email)) {
+      const existing = playersByEmail.get(player.email);
+      if (existing.startTime.valueOf() > player.startTime.valueOf()) {
+        playersByEmail.delete(player.email);
+        playersByEmail.set(player.email, player);
+      }
+    } else {
+      playersByEmail.set(player.email, player);
+    }
+  }
   
+  const players = [...playersByEmail.values()].map(p => { delete p.email; return p; });
   return { players };
 }, null, 'leaderboard');
